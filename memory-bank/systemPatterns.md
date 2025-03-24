@@ -15,26 +15,32 @@ The server acts as a bridge between AI assistants and the GitLab API, translatin
 
 ## Core Design Patterns
 
-### 1. Request Handler Pattern
+### 1. Server Initialization Pattern
+The server is initialized with proper capability configuration:
+- Explicit declaration of supported capabilities (`canListTools`, `canCallTools`, etc.)
+- Proper configuration of tools and resources capabilities objects
+- Configuration using the MCP SDK 1.7.0 patterns
+
+### 2. Request Handler Pattern
 The server implements request handlers for different MCP protocol operations:
 - `ListToolsRequestSchema`: Lists available GitLab tools
 - `CallToolRequestSchema`: Executes GitLab API operations
 - `ListResourcesRequestSchema`: Lists available GitLab resources
 - `ReadResourceRequestSchema`: Reads GitLab resources
 
-### 2. Adapter Pattern
+### 3. Adapter Pattern
 The server adapts GitLab API responses to MCP protocol responses, translating between different data formats and protocols.
 
-### 3. Configuration Pattern
+### 4. Configuration Pattern
 The server uses environment variables for configuration, allowing flexible deployment across different environments.
 
-### 4. Error Handling Pattern
+### 5. Error Handling Pattern
 Comprehensive error handling with meaningful error messages passed back through the MCP protocol.
 
 ## Component Structure
 
 ### Main Components
-1. **Server Initialization**: Setup of MCP server with configuration
+1. **Server Initialization**: Setup of MCP server with capabilities configuration
 2. **Axios Client**: HTTP client configured for GitLab API communication
 3. **Domain Managers**: Specialized classes for different GitLab domains
    - **IntegrationsManager**: Handles project integrations and webhooks
@@ -55,6 +61,15 @@ Comprehensive error handling with meaningful error messages passed back through 
 8. Server returns formatted response to AI assistant
 
 ## Key Technical Decisions
+
+### MCP SDK 1.7.0 Integration
+Using the latest MCP SDK version for improved capabilities and compatibility.
+
+### Proper Capability Configuration
+Explicit configuration of server capabilities:
+- Tools capability with proper structure
+- Resources capability with proper structure
+- Clear declaration of supported operations
 
 ### TypeScript Implementation
 Using TypeScript for type safety and improved developer experience.

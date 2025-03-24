@@ -7,23 +7,51 @@ The current development focus has been on finalizing the implementation of the G
 2. **CI/CD Settings Support**: Added capabilities to interact with GitLab CI/CD configuration, including pipeline triggers, variables, and runners
 3. **User and Group Management**: Implemented tools to manage users, groups, and permissions
 
-Most recently, we focused on fixing TypeScript compilation errors to ensure the project builds successfully. This included addressing type safety issues in webhook management and pipeline trigger operations.
+Most recently, we focused on fixing an issue where many tools weren't visible to the AI assistant. This included:
+1. Adding missing tool definitions in the tools-data.ts file for the integration, CI/CD, and users/groups tools
+2. Properly categorizing the tool definitions using array slicing for better organization
+3. Ensuring all tools registered in the tool registry have corresponding definitions
 
 ## Recent Changes
-- Fixed TypeScript errors related to webhook options in `gitlab_add_webhook` and `gitlab_update_webhook` operations
-- Added proper validation for required URL parameters in webhook operations
-- Fixed type casting for pipeline variables in `gitlab_trigger_pipeline` operation
-- Completed implementation of the handler functions in the main `index.ts` file for all tools
-- Organized code into domain-specific manager classes for better maintainability
-- Successfully verified the build process with no errors
+- Fixed a critical issue where the tool definitions were incomplete, causing many tools to be invisible to the AI assistant
+- Added missing tool definitions for all integration, CI/CD, and users/groups tools that were already implemented in handlers
+- Updated the category-specific tool exports to use proper array slicing for organization
+- Fixed the mismatch between the tool registry and the tool definitions
+- Updated the @modelcontextprotocol/sdk dependency to version 1.7.0 to support the latest protocol features
+- Fixed server initialization to properly configure capabilities for tools and resources
+- Implemented the correct structure for tools and resources capabilities using the { listChanged: false } format
+- Resolved "Server does not support tools" and "Server does not support resources" errors
+- Removed problematic registerCapabilities call that caused type errors
+- Successfully compiled the project with no TypeScript errors
 
 ## Active Decisions
+
+### Complete Tool Definitions
+- Updated the tool definitions in tools-data.ts to include all tools that were already implemented in the handlers
+- Used consistent schema patterns across all tool definitions 
+- Maintained proper type definition for complex parameter types like pipeline variables
+- Ensured required fields are properly marked for each tool
+
+### Server Initialization Pattern
+- Updated the server initialization to properly configure tools and resources capabilities
+- Followed the correct structure for capability objects according to the MCP SDK 1.7.0 requirements
+- Maintained the existing pattern for server setup while ensuring compatibility with the newer SDK
+
+### Code Reorganization
+- Implemented a modular file structure with domain-specific managers:
+  - `IntegrationsManager`: Handles project integrations and webhooks
+  - `CiCdManager`: Manages CI/CD pipelines, variables, and triggers
+  - `UsersGroupsManager`: Handles user and group administration
+- Created a tool registry that maps tool names to their handler functions
+- Extracted resource handlers into a separate utility module
+- Used consistent patterns for error handling and API access
 
 ### Type Safety Improvements
 - Added explicit validation for required parameters before API calls
 - Implemented proper type casting for API parameters to match expected interfaces
 - Added error handling for missing required parameters
-- Updated webhook handling to ensure proper type safety
+- Updated transport configuration to follow SDK patterns
+- Ensured proper typing for server initialization and startup
 
 ### Tool Selection
 The implementation now includes a comprehensive set of GitLab operations:
@@ -31,20 +59,6 @@ The implementation now includes a comprehensive set of GitLab operations:
 - Project integrations management (webhooks, Slack integration)
 - CI/CD configuration (pipeline triggers, variables, runners)
 - User and group management (users, groups, permissions)
-
-### API Access Patterns
-- Using personal access tokens for authentication
-- Supporting both GitLab.com and self-hosted instances
-- Implementing proper error handling for API failures
-- Using domain manager classes to organize related functionality
-
-### Code Organization
-- Separating functionality into domain-specific manager classes:
-  - `IntegrationsManager`: Handles project integrations and webhooks
-  - `CiCdManager`: Manages CI/CD pipelines, variables, and triggers
-  - `UsersGroupsManager`: Handles user and group administration
-- Using TypeScript for type safety and better developer experience
-- Implementing consistent error handling across all API calls
 
 ## Next Steps
 

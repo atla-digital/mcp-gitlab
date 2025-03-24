@@ -3,10 +3,15 @@
 ## What Works
 
 ### Core Functionality
-- ✅ MCP server setup and configuration
+- ✅ MCP server setup and configuration with proper capabilities for tools and resources
+- ✅ Integration with MCP SDK 1.7.0
 - ✅ GitLab API integration with axios
 - ✅ Error handling framework
+- ✅ Modular codebase structure with domain-specific managers
+- ✅ Tool registry for mapping tool names to handler functions
+- ✅ Complete tool definitions for all implemented tools
 - ✅ TypeScript compilation with no errors
+- ✅ Async server initialization with error handling
 
 ### Implemented Tools
 - ✅ `gitlab_list_projects`: List GitLab projects
@@ -64,6 +69,17 @@
 - ✅ Error handling for API errors
 - ✅ Type-safe webhook management
 - ✅ Type-safe pipeline variables
+- ✅ Proper server initialization with capabilities support
+- ✅ Compatibility with MCP SDK 1.7.0
+- ✅ Async/await pattern for server startup
+
+### Code Organization
+- ✅ Tool registry for mapping tool names to handler functions
+- ✅ Modular file structure with domain-specific manager classes
+- ✅ Centralized error handling utilities
+- ✅ Separated resource handler functions
+- ✅ Clean type definitions and interfaces
+- ✅ Complete tool definitions for all implemented tools
 
 ### Documentation
 - ✅ Basic setup instructions
@@ -107,21 +123,32 @@
 - ⬜ API reference documentation
 
 ## Current Status
-The GitLab MCP Server has been significantly enhanced with new capabilities beyond the initial core features. It now provides a comprehensive set of GitLab operations through the MCP protocol, allowing AI assistants to interact with:
+The GitLab MCP Server has been significantly enhanced with all tools now properly defined and visible to the AI assistant. The key improvements include:
+
+1. **Fixed Missing Tool Definitions**: Added missing tool definitions for all implemented tools in the integration, CI/CD, and users/groups domains
+2. **Proper Tool Categorization**: Categorized tools correctly using array slicing for better organization
+3. **Complete Tool Registry**: Ensured all tool handlers have corresponding tool definitions
+4. **Updated SDK**: Upgraded from MCP SDK version 0.6.0 to 1.7.0 to support the latest protocol features
+5. **Fixed Server Initialization**: Corrected the server initialization to properly configure tools and resources capabilities
+6. **Proper Capability Structure**: Implemented the correct structure for capabilities objects using the format expected by the SDK
+7. **Error Resolution**: Fixed "Server does not support tools" and "Server does not support resources" errors
+8. **Type-Safe Implementation**: Resolved type errors in the server configuration
+
+The server now provides a comprehensive set of GitLab operations through the MCP protocol, allowing AI assistants to interact with:
 
 1. **GitLab Repositories**: Browse repositories, branches, files, and commit information
 2. **Project Integrations**: Manage webhooks and service integrations, with specific support for Slack integration
 3. **CI/CD Pipelines**: Configure and trigger pipelines, manage variables and schedules
 4. **User & Group Management**: Administer users, groups, and access permissions
 
-The server now supports both read and write operations across all these areas, enabling AI assistants to help with a wide range of GitLab management tasks.
-
 The implementation has been completed with:
 - Domain-specific manager classes for better code organization
+- Tool registry for mapping tool names to handler functions
+- Complete tool definitions for all implemented tools
 - Proper type casting to ensure type safety
 - Comprehensive error handling for all API calls
 - Consistent parameter validation across all tools
-- Fixed TypeScript errors in webhook and pipeline trigger operations
+- Fixed server initialization to properly support tools and resources capabilities
 - Successfully builds with no TypeScript compilation errors
 
 ## Known Issues

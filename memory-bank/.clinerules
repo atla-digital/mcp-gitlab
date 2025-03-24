@@ -9,6 +9,27 @@
 - Maintain clear error handling with descriptive messages
 - Use detailed JSDoc comments for functions and classes
 - Keep Git commits focused and descriptive
+- Use modular file organization with domain-specific managers
+- Implement tool registry pattern for mapping tool names to handlers
+
+### Server Implementation Patterns
+- Use `connect` method with the transport for server initialization
+- Implement async/await pattern for server startup
+- Add proper error handling for server initialization
+- Create separate methods for server setup and startup
+- Follow MCP SDK patterns for transport configuration
+- Add try/catch blocks for async operations to handle errors gracefully
+
+### Tool Definition Patterns
+- Create complete tool definitions for all implemented tools in tools-data.ts
+- Keep toolDefinitions array and toolRegistry object in sync
+- Use consistent schema patterns for similar tools
+- Ensure all required parameters are marked as required in the schema
+- Categorize tools by domain using array slicing for exports
+- Include clear descriptions for tools and their parameters
+- Use enum for parameters with specific valid values
+- Use proper schema for complex types like pipeline variables
+- Document parameter requirements in tool descriptions
 
 ### Type Safety Patterns
 - Ensure proper type casting for all API parameters
@@ -18,6 +39,7 @@
 - Add interface definitions for complex parameters
 - Ensure webhook parameters include required URL field
 - Type pipeline variables properly as Record<string, string> | undefined
+- Ensure proper types for all exported functions and interfaces
 
 ### API Patterns
 - All GitLab API calls should use the central axiosInstance
@@ -25,12 +47,17 @@
 - Handle and transform GitLab API responses consistently
 - Implement proper error handling for all API calls
 - Follow GitLab API v4 conventions for endpoints
+- Use domain manager classes to organize related API functionality
+- Create reusable utility functions for common API operations
 
 ### MCP Protocol Patterns
 - Ensure all tool implementations follow MCP protocol specifications
 - Return structured error messages for easier troubleshooting
 - Format responses according to MCP content types
 - Document all tools with clear descriptions and parameter details
+- Use the proper method for setting up MCP server transport
+- Follow async patterns for server connection and startup
+- Ensure all implemented tool handlers have corresponding tool definitions
 
 ## Development Workflow
 - Use `npm run build` to compile TypeScript code
@@ -39,6 +66,8 @@
 - Keep documentation in sync with code changes
 - Consider backward compatibility when modifying existing tools
 - Update the progress.md file when implementing new features
+- Ensure server initialization and connection works properly before adding new features
+- Verify that all implemented tools are properly defined in tools-data.ts
 
 ## Implementation Guidelines
 - Keep tool implementations modular and focused
@@ -52,6 +81,8 @@
 - Validate all required parameters before making API calls
 - Extract common functionality into shared methods within domain managers
 - Follow a consistent pattern for handler functions in index.ts
+- Use the tool registry pattern for registering and accessing tool handlers
+- Maintain synchronization between tool registry and tool definitions
 
 ## Testing Approach
 - Test with both GitLab.com and self-hosted instances
@@ -60,6 +91,9 @@
 - Ensure proper handling of non-ASCII characters in responses
 - Validate error messages are helpful and descriptive
 - Verify proper type checking for all parameters
+- Test server initialization and connection with different environments
+- Verify proper error handling for failed connections
+- Verify all tools are visible to the AI assistant
 
 ## Documentation Standards
 - Maintain clear README with setup instructions
@@ -68,3 +102,4 @@
 - Keep configuration instructions up to date
 - Document known limitations and issues
 - Document type requirements for tool parameters
+- Document server initialization and startup process

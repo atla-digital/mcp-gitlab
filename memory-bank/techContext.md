@@ -9,7 +9,7 @@
 - **GitLab API v4**: RESTful API for GitLab operations
 
 ### Dependencies
-- **@modelcontextprotocol/sdk (v0.6.0)**: MCP SDK for server implementation
+- **@modelcontextprotocol/sdk (v1.7.0)**: MCP SDK for server implementation
 - **axios**: HTTP client for GitLab API communication
 - **TypeScript**: For type definitions and compilation
 
@@ -51,6 +51,7 @@ The build process uses TypeScript compiler (tsc) to generate JavaScript files in
 - Limited to operations defined in MCP protocol
 - Communication through stdio only
 - Limited support for streaming or large data transfers
+- Server must properly configure capabilities for tools and resources
 
 ### Security Considerations
 - API tokens must be kept secure
