@@ -1,0 +1,70 @@
+# Cline Rules: GitLab MCP Server
+
+## Project Patterns
+
+### Code Style and Structure
+- Use TypeScript for all new code
+- Follow ES6+ syntax and patterns
+- Use async/await for asynchronous operations
+- Maintain clear error handling with descriptive messages
+- Use detailed JSDoc comments for functions and classes
+- Keep Git commits focused and descriptive
+
+### Type Safety Patterns
+- Ensure proper type casting for all API parameters
+- Validate required parameters before making API calls
+- Add explicit validation for required parameters with descriptive error messages
+- Use type assertions only when you're certain of the type
+- Add interface definitions for complex parameters
+- Ensure webhook parameters include required URL field
+- Type pipeline variables properly as Record<string, string> | undefined
+
+### API Patterns
+- All GitLab API calls should use the central axiosInstance
+- Properly encode URL parameters for GitLab API paths
+- Handle and transform GitLab API responses consistently
+- Implement proper error handling for all API calls
+- Follow GitLab API v4 conventions for endpoints
+
+### MCP Protocol Patterns
+- Ensure all tool implementations follow MCP protocol specifications
+- Return structured error messages for easier troubleshooting
+- Format responses according to MCP content types
+- Document all tools with clear descriptions and parameter details
+
+## Development Workflow
+- Use `npm run build` to compile TypeScript code
+- Fix any TypeScript compilation errors immediately before proceeding
+- Test changes with real GitLab repositories
+- Keep documentation in sync with code changes
+- Consider backward compatibility when modifying existing tools
+- Update the progress.md file when implementing new features
+
+## Implementation Guidelines
+- Keep tool implementations modular and focused
+- Use the domain manager classes for related functionality
+- Reuse API calling patterns where appropriate
+- Consider GitLab API rate limits in implementation
+- Implement pagination for list operations where needed
+- Follow security best practices for handling tokens and sensitive data
+- Use consistent error handling patterns across all domain managers
+- Use proper TypeScript type casting for parameters to ensure type safety
+- Validate all required parameters before making API calls
+- Extract common functionality into shared methods within domain managers
+- Follow a consistent pattern for handler functions in index.ts
+
+## Testing Approach
+- Test with both GitLab.com and self-hosted instances
+- Verify error cases and edge conditions
+- Test with repositories of varying sizes and structures
+- Ensure proper handling of non-ASCII characters in responses
+- Validate error messages are helpful and descriptive
+- Verify proper type checking for all parameters
+
+## Documentation Standards
+- Maintain clear README with setup instructions
+- Document all tools with parameters and return values
+- Include usage examples for common operations
+- Keep configuration instructions up to date
+- Document known limitations and issues
+- Document type requirements for tool parameters
