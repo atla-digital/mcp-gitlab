@@ -13,6 +13,13 @@ Most recently, we focused on fixing an issue where many tools weren't visible to
 3. Ensuring all tools registered in the tool registry have corresponding definitions
 
 ## Recent Changes
+- Added two new tools for enhanced GitLab merge request management:
+  - `gitlab_update_merge_request`: Enables updating the title and description of merge requests
+  - `gitlab_create_merge_request_note_internal`: Adds support for internal notes (only visible to project members)
+- Updated tool registry to include the new handlers
+- Added tool definitions with proper schemas and validation
+- Updated repository tools category to include the new tools
+- Successfully built and tested the new functionality
 - Fixed a critical issue where the tool definitions were incomplete, causing many tools to be invisible to the AI assistant
 - Added missing tool definitions for all integration, CI/CD, and users/groups tools that were already implemented in handlers
 - Updated the category-specific tool exports to use proper array slicing for organization
@@ -67,6 +74,7 @@ The implementation now includes a comprehensive set of GitLab operations:
 2. Add support for pagination in list operations
 3. Implement unit tests for all tools
 4. Create comprehensive documentation for all tools
+5. Add support for updating merge request approvals and labels
 
 ### Medium-term Goals
 1. Expand tool set to cover more GitLab API endpoints

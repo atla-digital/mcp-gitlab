@@ -144,6 +144,58 @@ export const toolDefinitions = [
     }
   },
   {
+    name: 'gitlab_create_merge_request_note_internal',
+    description: 'Add a comment to a merge request with option to make it an internal note',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project_id: {
+          type: 'string',
+          description: 'The ID or URL-encoded path of the project'
+        },
+        merge_request_iid: {
+          type: 'number',
+          description: 'The internal ID of the merge request'
+        },
+        body: {
+          type: 'string',
+          description: 'The content of the note/comment'
+        },
+        internal: {
+          type: 'boolean',
+          description: 'If true, the note will be marked as an internal note visible only to project members'
+        }
+      },
+      required: ['project_id', 'merge_request_iid', 'body']
+    }
+  },
+  {
+    name: 'gitlab_update_merge_request',
+    description: 'Update a merge request title and description',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project_id: {
+          type: 'string',
+          description: 'The ID or URL-encoded path of the project'
+        },
+        merge_request_iid: {
+          type: 'number',
+          description: 'The internal ID of the merge request'
+        },
+        title: {
+          type: 'string',
+          description: 'The title of the merge request'
+        },
+        description: {
+          type: 'string',
+          description: 'The description of the merge request'
+        }
+      },
+      required: ['project_id', 'merge_request_iid']
+    }
+  },
+  {
     name: 'gitlab_list_issues',
     description: 'List issues in a GitLab project',
     inputSchema: {
@@ -802,7 +854,7 @@ export const toolDefinitions = [
 ];
 
 // Export lists of tools by category for easier selection
-export const repositoryTools = toolDefinitions.slice(0, 10);
+export const repositoryTools = toolDefinitions.slice(0, 12);
 export const integrationTools = toolDefinitions.slice(10, 20);
 export const cicdTools = toolDefinitions.slice(20, 31);
 export const usersGroupsTools = toolDefinitions.slice(31); 

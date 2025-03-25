@@ -160,4 +160,40 @@ export const compareBranches: ToolHandler = async (params, context) => {
     { params: { from, to } }
   );
   return formatResponse(response.data);
+};
+
+/**
+ * Update merge request title and description handler
+ */
+export const updateMergeRequest: ToolHandler = async (params, context) => {
+  const { project_id, merge_request_iid, title, description } = params.arguments || {};
+  if (!project_id || !merge_request_iid) {
+    throw new McpError(ErrorCode.InvalidParams, 'project_id and merge_request_iid are required');
+  }
+  
+  if (!title && !description) {
+    throw new McpError(ErrorCode.InvalidParams, 'At least one of title or description is required');
+  }
+  
+  const response = await context.axiosInstance.put(
+    `/projects/${encodeURIComponent(String(project_id))}/merge_requests/${merge_request_iid}`,
+    { title, description }
+  );
+  return formatResponse(response.data);
+};
+
+/**
+ * Create merge request note handler with internal note option
+ */
+export const createMergeRequestNoteInternal: ToolHandler = async (params, context) => {
+  const { project_id, merge_request_iid, body, internal } = params.arguments || {};
+  if (!project_id || !merge_request_iid || !body) {
+    throw new McpError(ErrorCode.InvalidParams, 'project_id, merge_request_iid, and body are required');
+  }
+  
+  const response = await context.axiosInstance.post(
+    `/projects/${encodeURIComponent(String(project_id))}/merge_requests/${merge_request_iid}/notes`,
+    { body, internal: internal === true }
+  );
+  return formatResponse(response.data);
 }; 

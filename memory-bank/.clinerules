@@ -11,6 +11,7 @@
 - Keep Git commits focused and descriptive
 - Use modular file organization with domain-specific managers
 - Implement tool registry pattern for mapping tool names to handlers
+- When adding new tools, update the tool registry, tool definitions and documentation
 
 ### Server Implementation Patterns
 - Use `connect` method with the transport for server initialization

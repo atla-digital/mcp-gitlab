@@ -21,6 +21,8 @@
 - ✅ `gitlab_get_merge_request`: Get merge request details
 - ✅ `gitlab_get_merge_request_changes`: Get merge request changes/diff
 - ✅ `gitlab_create_merge_request_note`: Add comment to merge request
+- ✅ `gitlab_create_merge_request_note_internal`: Add internal comment to merge request
+- ✅ `gitlab_update_merge_request`: Update merge request title and description
 - ✅ `gitlab_list_issues`: List project issues
 - ✅ `gitlab_get_repository_file`: Get repository file content
 - ✅ `gitlab_compare_branches`: Compare branches/tags/commits
@@ -123,16 +125,17 @@
 - ⬜ API reference documentation
 
 ## Current Status
-The GitLab MCP Server has been significantly enhanced with all tools now properly defined and visible to the AI assistant. The key improvements include:
+The GitLab MCP Server has been enhanced with additional merge request functionality and all tools are now properly defined and visible to the AI assistant. The key improvements include:
 
-1. **Fixed Missing Tool Definitions**: Added missing tool definitions for all implemented tools in the integration, CI/CD, and users/groups domains
-2. **Proper Tool Categorization**: Categorized tools correctly using array slicing for better organization
-3. **Complete Tool Registry**: Ensured all tool handlers have corresponding tool definitions
-4. **Updated SDK**: Upgraded from MCP SDK version 0.6.0 to 1.7.0 to support the latest protocol features
-5. **Fixed Server Initialization**: Corrected the server initialization to properly configure tools and resources capabilities
-6. **Proper Capability Structure**: Implemented the correct structure for capabilities objects using the format expected by the SDK
-7. **Error Resolution**: Fixed "Server does not support tools" and "Server does not support resources" errors
-8. **Type-Safe Implementation**: Resolved type errors in the server configuration
+1. **Enhanced Merge Request Tools**: Added new tools for updating merge request attributes and creating internal notes
+2. **Fixed Missing Tool Definitions**: Added missing tool definitions for all implemented tools in the integration, CI/CD, and users/groups domains
+3. **Proper Tool Categorization**: Categorized tools correctly using array slicing for better organization
+4. **Complete Tool Registry**: Ensured all tool handlers have corresponding tool definitions
+5. **Updated SDK**: Upgraded from MCP SDK version 0.6.0 to 1.7.0 to support the latest protocol features
+6. **Fixed Server Initialization**: Corrected the server initialization to properly configure tools and resources capabilities
+7. **Proper Capability Structure**: Implemented the correct structure for capabilities objects using the format expected by the SDK
+8. **Error Resolution**: Fixed "Server does not support tools" and "Server does not support resources" errors
+9. **Type-Safe Implementation**: Resolved type errors in the server configuration
 
 The server now provides a comprehensive set of GitLab operations through the MCP protocol, allowing AI assistants to interact with:
 
