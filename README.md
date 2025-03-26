@@ -47,7 +47,7 @@ This MCP server provides comprehensive tools for interacting with GitLab reposit
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/mcp-gitlab.git
+git clone https://github.com/rifqi96/mcp-gitlab.git
 cd mcp-gitlab
 ```
 
