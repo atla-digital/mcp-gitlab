@@ -7,9 +7,9 @@ Each tool is designed to interact with GitLab APIs, allowing AI assistants to wo
 ## Table of Contents
 
 - [Repository Management](#repository-management)
-- [Integrations & Webhooks](#integrations-and-webhooks)
+- [Integrations & Webhooks](#integrations--webhooks)
 - [CI/CD Management](#cicd-management)
-- [User & Group Management](#user-and-group-management)
+- [User & Group Management](#user--group-management)
 
 ## Repository Management
 

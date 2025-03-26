@@ -42,6 +42,7 @@ The server includes a pattern for automatically generating documentation from so
 - A script parses TypeScript source files to extract tool definitions
 - Documentation is generated in markdown format
 - Git hooks ensure documentation stays in sync with code
+- Special handling for GitHub-compatible anchor links
 
 ### 7. Developer Workflow Pattern
 The server implements a pattern for streamlined developer workflows:
@@ -105,12 +106,15 @@ Automated documentation generation from TypeScript source files:
 - Parses tool definitions to extract names, descriptions, and parameters
 - Generates markdown documentation organized by category
 - Updates documentation through git hooks
+- Custom handling for GitHub-compatible anchor links
+- Special cases for sections with ampersands and other special characters
 
 ### Git Workflow
 Git hooks ensure documentation stays in sync with code:
 - Pre-commit hook checks for changes to tool definitions
 - Documentation is automatically regenerated when needed
 - Hooks are versioned in the repository for easy installation
+- Only updates documentation when relevant files change
 
 ## Integration Points
 
@@ -122,6 +126,9 @@ Connects to GitLab API v4 for repository and project operations.
 
 ### Development Workflow Integration
 Integrates with git hooks for automated documentation updates.
+
+### GitHub Markdown Integration
+Ensures compatibility with GitHub's markdown rendering and anchor link conventions.
 
 ## Future Architecture Considerations
 1. Support for webhook callbacks

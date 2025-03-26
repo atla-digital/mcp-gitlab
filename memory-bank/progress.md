@@ -95,6 +95,7 @@
 - ✅ Environment configuration guidance
 - ✅ MIT license file added
 - ✅ Clear attribution to original project
+- ✅ Correct anchor links for all documentation sections
 
 ## What's Left to Build
 
@@ -139,7 +140,7 @@ The GitLab MCP Server has been enhanced with improved documentation, developer w
 2. **Git Hooks**: Implemented a pre-commit hook to keep documentation in sync with code
 3. **License**: Added MIT license file to clarify the project's licensing
 4. **Attribution**: Updated README.md to acknowledge that this is an extended version of the MCP GitLab server
-5. **Better Navigation**: Fixed anchor links in TOOLS.md for improved navigation
+5. **Better Navigation**: Fixed anchor links in TOOLS.md for improved navigation, particularly for sections with special characters
 6. **Documentation Organization**: Moved detailed tool documentation from README.md to TOOLS.md
 7. **Developer Experience**: Added npm script for easy installation of git hooks
 

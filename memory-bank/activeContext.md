@@ -11,17 +11,19 @@ The current development focus has been on enhancing the documentation and develo
 Most recently, we focused on:
 1. Creating a script that automatically generates TOOLS.md from the src/utils/tools-data.ts file
 2. Setting up a git pre-commit hook to regenerate TOOLS.md whenever tools-data.ts changes
-3. Adding proper anchors in the TOOLS.md table of contents for better navigation
+3. Ensuring proper anchor links in the TOOLS.md table of contents using GitHub-compatible formats
 4. Adding the MIT license file to formally license the project
 5. Updating the README.md to mention the project's origin and link to the tools documentation
 
 ## Recent Changes
 - Added a script (`scripts/generate-tools-md.js`) to convert tools-data.ts to TOOLS.md in a well-formatted markdown table
 - Created a pre-commit git hook that automatically regenerates TOOLS.md when tools-data.ts changes
-- Added a versioned copy of the git hook in the repository for other developers
+- Created a versioned copy of the git hook in the repository for other developers
 - Updated package.json to add an `install-hooks` script for easier hook installation
 - Updated README.md installation instructions to mention the git hooks
-- Added proper anchor generation for the TOOLS.md table of contents
+- Fixed anchor link generation in TOOLS.md for sections with special characters, particularly:
+  - "Integrations & Webhooks" → "#integrations--webhooks"
+  - "User & Group Management" → "#user--group-management"
 - Added the MIT license file to the project
 - Updated README.md to mention that this is an extended version of the MCP GitLab server from the Model Context Protocol project
 - Restructured the README.md to use TOOLS.md as the source of truth for tool documentation
@@ -31,7 +33,7 @@ Most recently, we focused on:
 ### Auto-generated Documentation
 - Created a script that parses the tools-data.ts TypeScript file and generates a markdown table of all tools
 - Used regex patterns to extract tool names, descriptions, parameters, and required flags
-- Implemented proper anchor handling to ensure table of contents links work correctly
+- Implemented special handling for anchor links with ampersands
 - Created a git hook to ensure documentation stays in sync with code
 
 ### Git Hook Implementation
@@ -49,6 +51,12 @@ Most recently, we focused on:
   - User & Group Management
 - Added proper anchors for each section to make navigation easier
 - Updated README.md to link to TOOLS.md instead of containing duplicate information
+
+### Anchor Link Handling
+- Identified issues with GitHub's anchor link format for sections with special characters
+- Implemented hardcoded special cases for sections with ampersands to ensure correct navigation
+- Used single-dash format for ampersands (e.g., "User & Group Management" → "#user--group-management")
+- Ensured all table of contents links correctly point to their respective sections
 
 ### License and Attribution
 - Added the MIT license file to clarify the project's licensing

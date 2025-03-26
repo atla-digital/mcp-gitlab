@@ -23,6 +23,9 @@
 - Use the npm run install-hooks script to set up git hooks
 - Keep README.md and TOOLS.md in sync through automated tooling
 - Include both implementation and documentation in the same PR
+- For sections with special characters like ampersands, use the correct GitHub-compatible anchor format
+  - "User & Group Management" → "#user--group-management" 
+  - "Integrations & Webhooks" → "#integrations--webhooks"
 
 ### Server Implementation Patterns
 - Use `connect` method with the transport for server initialization
@@ -105,8 +108,8 @@
 - Parameters include name, type, required flag, and description
 - Git pre-commit hook automatically updates TOOLS.md when tools-data.ts changes
 - The hook is stored in git-hooks/ and can be installed with npm run install-hooks
-- Proper anchor links are generated for the table of contents
-- Special characters in anchor links are handled correctly
+- Handle special characters in anchor links correctly for GitHub compatibility
+- Use hardcoded anchor links for sections with ampersands to ensure correct navigation
 - Always run the documentation generator after making changes to tools-data.ts if not using the git hook
 
 ## Testing Approach
@@ -121,6 +124,7 @@
 - Verify all tools are visible to the AI assistant
 - Test the documentation generation script with various tool definitions
 - Verify the git pre-commit hook correctly updates documentation
+- Check that anchor links work correctly in generated documentation
 
 ## Documentation Standards
 - Maintain clear README with setup instructions

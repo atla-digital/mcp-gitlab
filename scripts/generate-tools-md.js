@@ -18,12 +18,18 @@ const outputPath = path.resolve(__dirname, '../TOOLS.md');
 
 // Convert heading text to GitHub-compatible anchor
 function generateAnchor(text) {
+  // Hard-coded anchors for specific categories
+  if (text === 'Integrations & Webhooks') {
+    return 'integrations--webhooks';
+  } else if (text === 'User & Group Management') {
+    return 'user--group-management';
+  }
+  
+  // Generic anchor generation for other categories
   return text
     .toLowerCase()
-    .replace(/[&]/g, 'and')  // Replace & with 'and'
-    .replace(/[/]/g, '')     // Remove forward slashes
-    .replace(/\s+/g, '-')    // Replace spaces with hyphens
-    .replace(/[^\w-]/g, ''); // Remove any other non-word/non-hyphen characters
+    .replace(/[\/]/g, '')     // Remove forward slashes
+    .replace(/\s+/g, '-');    // Replace spaces with hyphens
 }
 
 try {
