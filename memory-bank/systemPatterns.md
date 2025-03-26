@@ -37,6 +37,18 @@ The server uses environment variables for configuration, allowing flexible deplo
 ### 5. Error Handling Pattern
 Comprehensive error handling with meaningful error messages passed back through the MCP protocol.
 
+### 6. Documentation Generation Pattern
+The server includes a pattern for automatically generating documentation from source code:
+- A script parses TypeScript source files to extract tool definitions
+- Documentation is generated in markdown format
+- Git hooks ensure documentation stays in sync with code
+
+### 7. Developer Workflow Pattern
+The server implements a pattern for streamlined developer workflows:
+- Git hooks automatically update documentation on commit
+- npm scripts allow easy hook installation
+- Consistent formatting and organization of code and documentation
+
 ## Component Structure
 
 ### Main Components
@@ -49,6 +61,8 @@ Comprehensive error handling with meaningful error messages passed back through 
 4. **Resource Handlers**: Handle resource listing and reading
 5. **Tool Handlers**: Handle tool listing and execution
 6. **Error Handling**: Manage and format errors
+7. **Documentation Generation**: Script to generate tool documentation from source code
+8. **Git Hooks**: Pre-commit hook to ensure documentation stays in sync
 
 ### Data Flow
 1. AI assistant sends request through MCP protocol
@@ -86,6 +100,18 @@ Using stdio for MCP protocol communication for compatibility with various AI ass
 ### Error Handling Strategy
 Detailed error handling with appropriate error codes and messages to facilitate troubleshooting.
 
+### Documentation Generation
+Automated documentation generation from TypeScript source files:
+- Parses tool definitions to extract names, descriptions, and parameters
+- Generates markdown documentation organized by category
+- Updates documentation through git hooks
+
+### Git Workflow
+Git hooks ensure documentation stays in sync with code:
+- Pre-commit hook checks for changes to tool definitions
+- Documentation is automatically regenerated when needed
+- Hooks are versioned in the repository for easy installation
+
 ## Integration Points
 
 ### MCP Protocol Integration
@@ -94,8 +120,12 @@ Implements the Model Context Protocol to communicate with AI assistants.
 ### GitLab API Integration
 Connects to GitLab API v4 for repository and project operations.
 
+### Development Workflow Integration
+Integrates with git hooks for automated documentation updates.
+
 ## Future Architecture Considerations
 1. Support for webhook callbacks
 2. Caching of GitLab API responses
 3. Additional authentication methods
 4. Expansion to more GitLab API endpoints
+5. Automated testing through CI/CD pipelines

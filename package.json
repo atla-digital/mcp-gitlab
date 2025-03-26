@@ -14,7 +14,8 @@
     "build": "tsc && node -e \"import('fs').then(fs => fs.chmodSync('build/index.js', '755'))\"",
     "prepare": "npm run build",
     "watch": "tsc --watch",
-    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
+    "install-hooks": "cp -f git-hooks/pre-commit .git/hooks/ && chmod +x .git/hooks/pre-commit"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.7.0",

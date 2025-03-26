@@ -1,80 +1,67 @@
 # Active Context: GitLab MCP Server
 
 ## Current Focus
-The current development focus has been on finalizing the implementation of the GitLab MCP server capabilities across three key areas:
+The current development focus has been on enhancing the documentation and developer workflow for the GitLab MCP server:
 
-1. **Project Settings Management**: Implemented tools for managing project integrations and webhooks, with a primary focus on CRUD operations for triggers and Slack integration
-2. **CI/CD Settings Support**: Added capabilities to interact with GitLab CI/CD configuration, including pipeline triggers, variables, and runners
-3. **User and Group Management**: Implemented tools to manage users, groups, and permissions
+1. **Documentation Improvements**: Added a centralized tools documentation in TOOLS.md generated from the source code to make it easier for developers to understand the available tools
+2. **Developer Workflow Enhancements**: Implemented git hooks to automatically keep documentation in sync with code
+3. **License Clarification**: Added MIT license file to clarify the project's licensing
+4. **Project Attribution**: Updated README.md to acknowledge this is an extension of the Model Context Protocol project
 
-Most recently, we focused on fixing an issue where many tools weren't visible to the AI assistant. This included:
-1. Adding missing tool definitions in the tools-data.ts file for the integration, CI/CD, and users/groups tools
-2. Properly categorizing the tool definitions using array slicing for better organization
-3. Ensuring all tools registered in the tool registry have corresponding definitions
+Most recently, we focused on:
+1. Creating a script that automatically generates TOOLS.md from the src/utils/tools-data.ts file
+2. Setting up a git pre-commit hook to regenerate TOOLS.md whenever tools-data.ts changes
+3. Adding proper anchors in the TOOLS.md table of contents for better navigation
+4. Adding the MIT license file to formally license the project
+5. Updating the README.md to mention the project's origin and link to the tools documentation
 
 ## Recent Changes
-- Added two new tools for enhanced GitLab merge request management:
-  - `gitlab_update_merge_request`: Enables updating the title and description of merge requests
-  - `gitlab_create_merge_request_note_internal`: Adds support for internal notes (only visible to project members)
-- Updated tool registry to include the new handlers
-- Added tool definitions with proper schemas and validation
-- Updated repository tools category to include the new tools
-- Successfully built and tested the new functionality
-- Fixed a critical issue where the tool definitions were incomplete, causing many tools to be invisible to the AI assistant
-- Added missing tool definitions for all integration, CI/CD, and users/groups tools that were already implemented in handlers
-- Updated the category-specific tool exports to use proper array slicing for organization
-- Fixed the mismatch between the tool registry and the tool definitions
-- Updated the @modelcontextprotocol/sdk dependency to version 1.7.0 to support the latest protocol features
-- Fixed server initialization to properly configure capabilities for tools and resources
-- Implemented the correct structure for tools and resources capabilities using the { listChanged: false } format
-- Resolved "Server does not support tools" and "Server does not support resources" errors
-- Removed problematic registerCapabilities call that caused type errors
-- Successfully compiled the project with no TypeScript errors
+- Added a script (`scripts/generate-tools-md.js`) to convert tools-data.ts to TOOLS.md in a well-formatted markdown table
+- Created a pre-commit git hook that automatically regenerates TOOLS.md when tools-data.ts changes
+- Added a versioned copy of the git hook in the repository for other developers
+- Updated package.json to add an `install-hooks` script for easier hook installation
+- Updated README.md installation instructions to mention the git hooks
+- Added proper anchor generation for the TOOLS.md table of contents
+- Added the MIT license file to the project
+- Updated README.md to mention that this is an extended version of the MCP GitLab server from the Model Context Protocol project
+- Restructured the README.md to use TOOLS.md as the source of truth for tool documentation
 
 ## Active Decisions
 
-### Complete Tool Definitions
-- Updated the tool definitions in tools-data.ts to include all tools that were already implemented in the handlers
-- Used consistent schema patterns across all tool definitions 
-- Maintained proper type definition for complex parameter types like pipeline variables
-- Ensured required fields are properly marked for each tool
+### Auto-generated Documentation
+- Created a script that parses the tools-data.ts TypeScript file and generates a markdown table of all tools
+- Used regex patterns to extract tool names, descriptions, parameters, and required flags
+- Implemented proper anchor handling to ensure table of contents links work correctly
+- Created a git hook to ensure documentation stays in sync with code
 
-### Server Initialization Pattern
-- Updated the server initialization to properly configure tools and resources capabilities
-- Followed the correct structure for capability objects according to the MCP SDK 1.7.0 requirements
-- Maintained the existing pattern for server setup while ensuring compatibility with the newer SDK
+### Git Hook Implementation
+- Created a git pre-commit hook that detects changes to tools-data.ts and automatically regenerates TOOLS.md
+- Added the hook to both .git/hooks (local) and git-hooks/ (versioned) directories
+- Added an npm script for easy installation of the hooks
+- Configured the hook to only run when relevant files change to avoid unnecessary processing
 
-### Code Reorganization
-- Implemented a modular file structure with domain-specific managers:
-  - `IntegrationsManager`: Handles project integrations and webhooks
-  - `CiCdManager`: Manages CI/CD pipelines, variables, and triggers
-  - `UsersGroupsManager`: Handles user and group administration
-- Created a tool registry that maps tool names to their handler functions
-- Extracted resource handlers into a separate utility module
-- Used consistent patterns for error handling and API access
+### Documentation Organization
+- Moved detailed tool documentation from README.md to TOOLS.md
+- Organized tools by category in the documentation:
+  - Repository Management
+  - Integrations & Webhooks
+  - CI/CD Management
+  - User & Group Management
+- Added proper anchors for each section to make navigation easier
+- Updated README.md to link to TOOLS.md instead of containing duplicate information
 
-### Type Safety Improvements
-- Added explicit validation for required parameters before API calls
-- Implemented proper type casting for API parameters to match expected interfaces
-- Added error handling for missing required parameters
-- Updated transport configuration to follow SDK patterns
-- Ensured proper typing for server initialization and startup
-
-### Tool Selection
-The implementation now includes a comprehensive set of GitLab operations:
-- Core repository operations (projects, branches, merge requests, issues, files)
-- Project integrations management (webhooks, Slack integration)
-- CI/CD configuration (pipeline triggers, variables, runners)
-- User and group management (users, groups, permissions)
+### License and Attribution
+- Added the MIT license file to clarify the project's licensing
+- Updated README.md to acknowledge that this is an extended version of the MCP GitLab server
+- Added a link to the original project repository for attribution
 
 ## Next Steps
 
 ### Short-term Tasks
-1. Continue refining type safety throughout the codebase
+1. Complete unit tests for all tools
 2. Add support for pagination in list operations
-3. Implement unit tests for all tools
-4. Create comprehensive documentation for all tools
-5. Add support for updating merge request approvals and labels
+3. Support for wiki management
+4. Support for repository commits and tags
 
 ### Medium-term Goals
 1. Expand tool set to cover more GitLab API endpoints

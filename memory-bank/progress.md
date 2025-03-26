@@ -12,6 +12,10 @@
 - ✅ Complete tool definitions for all implemented tools
 - ✅ TypeScript compilation with no errors
 - ✅ Async server initialization with error handling
+- ✅ Auto-generated tool documentation (TOOLS.md)
+- ✅ Pre-commit hook for keeping documentation in sync
+- ✅ MIT license file added
+- ✅ Clear attribution to original project
 
 ### Implemented Tools
 - ✅ `gitlab_list_projects`: List GitLab projects
@@ -83,10 +87,14 @@
 - ✅ Clean type definitions and interfaces
 - ✅ Complete tool definitions for all implemented tools
 
-### Documentation
+### Documentation and Developer Experience
 - ✅ Basic setup instructions
-- ✅ Tool descriptions and parameters
+- ✅ Auto-generated tool documentation (TOOLS.md)
+- ✅ Git pre-commit hook for keeping documentation in sync
+- ✅ npm script for easy hook installation
 - ✅ Environment configuration guidance
+- ✅ MIT license file added
+- ✅ Clear attribution to original project
 
 ## What's Left to Build
 
@@ -125,38 +133,25 @@
 - ⬜ API reference documentation
 
 ## Current Status
-The GitLab MCP Server has been enhanced with additional merge request functionality and all tools are now properly defined and visible to the AI assistant. The key improvements include:
+The GitLab MCP Server has been enhanced with improved documentation, developer workflows, and project attribution:
 
-1. **Enhanced Merge Request Tools**: Added new tools for updating merge request attributes and creating internal notes
-2. **Fixed Missing Tool Definitions**: Added missing tool definitions for all implemented tools in the integration, CI/CD, and users/groups domains
-3. **Proper Tool Categorization**: Categorized tools correctly using array slicing for better organization
-4. **Complete Tool Registry**: Ensured all tool handlers have corresponding tool definitions
-5. **Updated SDK**: Upgraded from MCP SDK version 0.6.0 to 1.7.0 to support the latest protocol features
-6. **Fixed Server Initialization**: Corrected the server initialization to properly configure tools and resources capabilities
-7. **Proper Capability Structure**: Implemented the correct structure for capabilities objects using the format expected by the SDK
-8. **Error Resolution**: Fixed "Server does not support tools" and "Server does not support resources" errors
-9. **Type-Safe Implementation**: Resolved type errors in the server configuration
+1. **Auto-generated Documentation**: Created a script that generates TOOLS.md from tools-data.ts to provide a complete reference of available tools
+2. **Git Hooks**: Implemented a pre-commit hook to keep documentation in sync with code
+3. **License**: Added MIT license file to clarify the project's licensing
+4. **Attribution**: Updated README.md to acknowledge that this is an extended version of the MCP GitLab server
+5. **Better Navigation**: Fixed anchor links in TOOLS.md for improved navigation
+6. **Documentation Organization**: Moved detailed tool documentation from README.md to TOOLS.md
+7. **Developer Experience**: Added npm script for easy installation of git hooks
 
-The server now provides a comprehensive set of GitLab operations through the MCP protocol, allowing AI assistants to interact with:
+The server continues to provide a comprehensive set of GitLab operations through the MCP protocol, allowing AI assistants to interact with:
 
 1. **GitLab Repositories**: Browse repositories, branches, files, and commit information
 2. **Project Integrations**: Manage webhooks and service integrations, with specific support for Slack integration
 3. **CI/CD Pipelines**: Configure and trigger pipelines, manage variables and schedules
 4. **User & Group Management**: Administer users, groups, and access permissions
 
-The implementation has been completed with:
-- Domain-specific manager classes for better code organization
-- Tool registry for mapping tool names to handler functions
-- Complete tool definitions for all implemented tools
-- Proper type casting to ensure type safety
-- Comprehensive error handling for all API calls
-- Consistent parameter validation across all tools
-- Fixed server initialization to properly support tools and resources capabilities
-- Successfully builds with no TypeScript compilation errors
-
 ## Known Issues
 1. No pagination support for list operations, which may result in incomplete results for large repositories
 2. No caching mechanism for API responses
 3. No support for GraphQL API (only REST API v4)
 4. Limited test coverage for the new functionality
-5. Documentation needs to be updated to cover all new tools

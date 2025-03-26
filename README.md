@@ -63,7 +63,15 @@ npm install
 npm run build
 ```
 
-4. Configure your GitLab API token:
+4. Install git hooks (optional, but recommended for contributors):
+
+```bash
+npm run install-hooks
+```
+
+This installs a pre-commit hook that automatically regenerates TOOLS.md when src/utils/tools-data.ts changes.
+
+5. Configure your GitLab API token:
 
 You need to provide your GitLab API token in the MCP settings configuration file. The token is used to authenticate with the GitLab API.
 
