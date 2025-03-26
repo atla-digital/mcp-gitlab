@@ -16,6 +16,16 @@ const __dirname = path.dirname(__filename);
 const toolsDataPath = path.resolve(__dirname, '../src/utils/tools-data.ts');
 const outputPath = path.resolve(__dirname, '../TOOLS.md');
 
+// Convert heading text to GitHub-compatible anchor
+function generateAnchor(text) {
+  return text
+    .toLowerCase()
+    .replace(/[&]/g, 'and')  // Replace & with 'and'
+    .replace(/[/]/g, '')     // Remove forward slashes
+    .replace(/\s+/g, '-')    // Replace spaces with hyphens
+    .replace(/[^\w-]/g, ''); // Remove any other non-word/non-hyphen characters
+}
+
 try {
   // Read the source file
   const toolsData = fs.readFileSync(toolsDataPath, 'utf8');
@@ -145,7 +155,8 @@ try {
   // Generate table of contents
   markdown += '## Table of Contents\n\n';
   Object.keys(categories).forEach(category => {
-    markdown += `- [${category}](#${category.toLowerCase().replace(/[&]/g, '').replace(/\s+/g, '-')})\n`;
+    const anchor = generateAnchor(category);
+    markdown += `- [${category}](#${anchor})\n`;
   });
   markdown += '\n';
   
