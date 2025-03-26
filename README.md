@@ -2,6 +2,10 @@
 
 A Model Context Protocol (MCP) server that enables you to interact with your GitLab account. Get diffs, analyze merge requests, review code, cherry-pick changes, and more. This is an extended version of the [MCP GitLab Server](https://github.com/modelcontextprotocol/servers/tree/main/src/gitlab) from the Model Context Protocol project.
 
+<a href="https://glama.ai/mcp/servers/@rifqi96/mcp-gitlab">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@rifqi96/mcp-gitlab/badge" alt="GitLab Server MCP server" />
+</a>
+
 ## Features
 
 This MCP server provides comprehensive tools for interacting with GitLab repositories, including:
