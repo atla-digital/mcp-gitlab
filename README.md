@@ -36,13 +36,50 @@ This MCP server provides comprehensive tools for interacting with GitLab reposit
 
 ## Installation
 
-### Prerequisites
+### Option 1: Using Pre-built Docker Image (Recommended)
+
+The easiest way to run the GitLab MCP Server is using the pre-built Docker image:
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/rifqi96/mcp-gitlab:latest
+
+# Run the container
+docker run -d -p 3001:3000 --name mcp-gitlab-server ghcr.io/rifqi96/mcp-gitlab:latest
+```
+
+The server will be available at `http://localhost:3001/mcp`
+
+### Option 2: Using Docker Compose
+
+Create a `docker-compose.yml` file:
+
+```yaml
+services:
+  mcp-gitlab:
+    image: ghcr.io/rifqi96/mcp-gitlab:latest
+    ports:
+      - "3001:3000"
+    restart: unless-stopped
+```
+
+Then run:
+
+```bash
+docker compose up -d
+```
+
+### Option 3: Building from Source
+
+If you want to build from source or contribute to the project:
+
+#### Prerequisites
 
 - Node.js (v16 or higher)
 - npm
 - A GitLab account with an API token
 
-### Setup
+#### Setup
 
 1. Clone the repository:
 
@@ -79,11 +116,11 @@ docker compose up --build -d
 
 The server will be available at `http://localhost:3001/mcp`
 
-6. Configure your MCP client:
+### Configuration
 
 This server implements **Streamable HTTP** as the primary MCP transport. For clients that don't support Streamable HTTP natively (like Claude Code), use `mcp-remote` as a proxy.
 
-### For Claude Code/Desktop
+#### For Claude Code/Desktop
 Add the following to your MCP settings file (`~/.claude.json`):
 
 ```json
@@ -109,7 +146,7 @@ Add the following to your MCP settings file (`~/.claude.json`):
 }
 ```
 
-### For Streamable HTTP Compatible Clients
+#### For Streamable HTTP Compatible Clients
 Direct connection to the server:
 ```
 http://localhost:3001/mcp
@@ -120,6 +157,29 @@ Pass GitLab credentials as HTTP headers:
 - `X-GitLab-URL`: Your GitLab API base URL (defaults to https://gitlab.com/api/v4)
 
 Replace `YOUR_GITLAB_API_TOKEN` with your actual GitLab API token. You can generate a token in your GitLab account under Settings > Access Tokens.
+
+### Updating to Latest Version
+
+To update to the latest version when using the pre-built Docker image:
+
+```bash
+# Stop the current container
+docker stop mcp-gitlab-server
+docker rm mcp-gitlab-server
+
+# Pull the latest image
+docker pull ghcr.io/rifqi96/mcp-gitlab:latest
+
+# Run with the new image
+docker run -d -p 3001:3000 --name mcp-gitlab-server ghcr.io/rifqi96/mcp-gitlab:latest
+```
+
+Or if using Docker Compose:
+
+```bash
+docker compose pull
+docker compose up -d
+```
 
 ## Available Tools
 
