@@ -5,23 +5,31 @@ The GitLab MCP Server fills a crucial need for developers who want to use AI ass
 
 ## Problems Solved
 1. **AI-GitLab Integration Gap**: Enables AI assistants to interact with GitLab without manual copying/pasting of data
-2. **Context Limitations**: Allows AI assistants to access repository code, merge requests, and issues directly
-3. **Workflow Friction**: Streamlines developer workflows by enabling AI to assist with GitLab operations
-4. **Repository Exploration**: Provides AI assistants with tools to explore and understand repository structure
-5. **Code Review Assistance**: Enables AI to review merge requests and provide feedback
+2. **Multi-Client Deployment Limitations**: Solved with superior Streamable HTTP transport supporting concurrent clients
+3. **Production Deployment Challenges**: Docker containerization with health monitoring and session management
+4. **Context Limitations**: Allows AI assistants to access repository code, merge requests, and issues directly
+5. **Workflow Friction**: Streamlines developer workflows by enabling AI to assist with GitLab operations
+6. **Repository Exploration**: Provides AI assistants with tools to explore and understand repository structure
+7. **Code Review Assistance**: Enables AI to review merge requests and provide feedback
+8. **Enterprise Scalability**: Session isolation and resource management for production environments
 
-## User Experience Goals
-- **Simple Setup**: Quick installation and configuration with minimal prerequisites
+## User Experience Goals - Enterprise Grade
+- **Superior Deployment Options**: Docker containerization with one-command deployment
+- **Multi-Client Architecture**: Support for concurrent AI assistants with independent sessions
+- **Production Readiness**: Health monitoring, resource management, and auto-restart capabilities
 - **Seamless Integration**: Transparent connection between AI assistants and GitLab repositories
-- **Complete Functionality**: Comprehensive coverage of essential GitLab operations
-- **Error Clarity**: Clear error messages that help troubleshoot issues
-- **Security**: Safe handling of API tokens and sensitive repository data
+- **Complete Functionality**: Comprehensive coverage of 61 GitLab operations across all domains
+- **Error Clarity**: Enhanced error messages with session-specific context
+- **Enterprise Security**: Session-isolated authentication with per-request token validation
+- **Zero-Downtime Operations**: Health checks and graceful shutdown for production environments
 
-## Target Users
-1. **Developers**: Software developers who use GitLab for version control and want AI assistance
-2. **DevOps Engineers**: Teams managing GitLab repositories and CI/CD pipelines
-3. **Technical Leads**: Team leaders who review code and manage GitLab projects
-4. **Open Source Contributors**: Contributors who interact with GitLab-hosted open source projects
+## Target Users - Enterprise & Individual
+1. **Enterprise Development Teams**: Organizations requiring multi-client AI assistant deployment
+2. **DevOps Engineers**: Teams managing GitLab repositories and CI/CD pipelines at scale
+3. **Technical Leads**: Team leaders who review code and manage GitLab projects across multiple repositories
+4. **Individual Developers**: Software developers who use GitLab for version control and want AI assistance
+5. **Open Source Contributors**: Contributors who interact with GitLab-hosted open source projects
+6. **Platform Teams**: Teams responsible for providing AI-enhanced development tools to organizations
 
 ## Use Cases
 1. **Code Review**: AI assistants analyze merge requests and provide feedback

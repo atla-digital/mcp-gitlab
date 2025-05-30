@@ -1,17 +1,29 @@
 # System Patterns: GitLab MCP Server
 
 ## Architecture Overview
-The GitLab MCP Server follows a straightforward architecture pattern:
+The GitLab MCP Server implements a **modern modular architecture** with multi-transport support:
 
 ```
-┌────────────────┐      ┌────────────────┐      ┌────────────────┐
-│                │      │                │      │                │
-│  AI Assistant  │◄────►│  MCP Server    │◄────►│  GitLab API    │
-│                │      │                │      │                │
-└────────────────┘      └────────────────┘      └────────────────┘
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│                 │    │                 │    │                 │
+│  Multi-Client   │    │  Streamable     │    │   Modular       │
+│  AI Assistants  │◄──►│  HTTP Server    │◄──►│  GitLab API     │
+│                 │    │  (Port 3001)    │    │  Integration    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                              │
+                    ┌─────────────────┐
+                    │                 │
+                    │  Session Mgmt   │
+                    │  & Health       │
+                    │  Monitoring     │
+                    └─────────────────┘
 ```
 
-The server acts as a bridge between AI assistants and the GitLab API, translating MCP protocol requests into GitLab API calls and formatting the responses appropriately.
+The server provides **superior deployment capabilities** through:
+- **Multi-client HTTP endpoint** supporting concurrent AI assistant connections
+- **Session-based authentication** allowing different GitLab tokens per client
+- **Docker containerization** with health monitoring and resource management
+- **Modular codebase** with focused domain separation and clear boundaries
 
 ## Core Design Patterns
 
@@ -52,28 +64,54 @@ The server implements a pattern for streamlined developer workflows:
 
 ## Component Structure
 
-### Main Components
-1. **Server Initialization**: Setup of MCP server with capabilities configuration
-2. **Axios Client**: HTTP client configured for GitLab API communication
-3. **Domain Managers**: Specialized classes for different GitLab domains
-   - **IntegrationsManager**: Handles project integrations and webhooks
-   - **CiCdManager**: Manages CI/CD pipelines, variables, and triggers
-   - **UsersGroupsManager**: Handles user and group administration
-4. **Resource Handlers**: Handle resource listing and reading
-5. **Tool Handlers**: Handle tool listing and execution
-6. **Error Handling**: Manage and format errors
-7. **Documentation Generation**: Script to generate tool documentation from source code
-8. **Git Hooks**: Pre-commit hook to ensure documentation stays in sync
+### Main Components - Modular Architecture
+1. **Streamable HTTP Server** (`src/server/streamable-http-server.ts`):
+   - Multi-client HTTP endpoint on port 3001
+   - Session management with per-request GitLab authentication
+   - Health monitoring endpoint for container orchestration
+   - CORS support and proper HTTP headers
 
-### Data Flow
-1. AI assistant sends request through MCP protocol
-2. Server validates request parameters
-3. Server routes the request to the appropriate domain manager (integrations, CI/CD, or users/groups)
-4. Domain manager translates request to GitLab API call
-5. Domain manager executes API call using the shared axios instance
-6. Domain manager processes response and handles any errors
-7. Server formats the response according to MCP protocol
-8. Server returns formatted response to AI assistant
+2. **Tool Definitions** (`src/tools/definitions/`):
+   - **Repository Tools** (`repository.ts`) - Project, branch, file operations
+   - **Merge Request Tools** (`merge-requests.ts`) - MR management and discussions
+   - **Issue Tools** (`issues.ts`) - Issue tracking and management
+   - **CI/CD Tools** (`ci-cd.ts`) - Pipeline and variable management
+   - **Integration Tools** (`integrations.ts`) - Webhooks and service integrations
+   - **User/Group Tools** (`users-groups.ts`) - Access control and administration
+
+3. **Handler Implementation** (`src/tools/handlers/`):
+   - **Repository Handlers** (`repository/`) - projects.ts, branches.ts, files.ts
+   - **Merge Request Handlers** (`merge-requests/`) - crud.ts, discussions.ts, comments.ts
+   - **Issue Handlers** (`issues/`) - crud.ts
+   - Domain-specific handler organization with clear separation
+
+4. **Service Managers** (`src/services/managers/`):
+   - **IntegrationsManager** - Project integrations and webhooks
+   - **CiCdManager** - CI/CD pipelines, variables, and triggers
+   - **UsersGroupsManager** - User and group administration
+   - Clean dependency injection and interface consistency
+
+5. **Enhanced Documentation System**:
+   - **Dynamic generation** from consolidated build outputs
+   - **Git hooks** supporting modular tool definition structure
+   - **Auto-sync** across multiple definition files
+
+### Data Flow - Enhanced Multi-Client Architecture
+1. **HTTP Request Reception**: Multi-client requests received on `/mcp` endpoint
+2. **Session Authentication**: Per-request GitLab token extraction and validation
+3. **MCP Protocol Processing**: Request routing through Streamable HTTP transport
+4. **Tool Registry Lookup**: Tool name mapped to specific handler in modular structure
+5. **Domain Handler Execution**: Focused handler executes with injected manager dependencies
+6. **GitLab API Integration**: Axios calls with session-specific authentication
+7. **Response Formatting**: Standardized MCP response formatting
+8. **Session Cleanup**: Automatic session lifecycle management
+
+### Deployment Flow
+1. **Multi-stage Docker Build**: Optimized build with distroless runtime
+2. **Health Check Integration**: Container orchestration with `/health` endpoint
+3. **Resource Management**: CPU and memory limits for production deployment
+4. **Port Mapping**: Host port 3001 → container port 3000
+5. **Concurrent Client Support**: Multiple AI assistants with independent sessions
 
 ## Key Technical Decisions
 
@@ -95,8 +133,13 @@ Using axios for HTTP requests to the GitLab API for its robust features and ease
 ### Environment-Based Configuration
 Configuration through environment variables for flexibility and security.
 
-### Stdio Communication
-Using stdio for MCP protocol communication for compatibility with various AI assistant platforms.
+### Streamable HTTP Communication
+**Superior transport implementation** using Streamable HTTP for:
+- Multi-client concurrent access
+- HTTP-based communication (more reliable than stdio)
+- Session management with per-client authentication
+- Container-friendly deployment with health monitoring
+- Better performance and error handling
 
 ### Error Handling Strategy
 Detailed error handling with appropriate error codes and messages to facilitate troubleshooting.

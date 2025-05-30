@@ -1,32 +1,55 @@
 # Active Context: GitLab MCP Server
 
 ## Current Focus
-The current development focus has been on enhancing the documentation and developer workflow for the GitLab MCP server:
+The development has achieved a major milestone with a comprehensive **modular architecture refactoring** that significantly improves maintainability and deployment capabilities:
 
-1. **Documentation Improvements**: Added a centralized tools documentation in TOOLS.md generated from the source code to make it easier for developers to understand the available tools
-2. **Developer Workflow Enhancements**: Implemented git hooks to automatically keep documentation in sync with code
-3. **License Clarification**: Added MIT license file to clarify the project's licensing
-4. **Project Attribution**: Updated README.md to acknowledge this is an extension of the Model Context Protocol project
+1. **Modular Architecture Implementation**: Successfully broke down monolithic files into focused domain-specific modules
+2. **Streamable HTTP Deployment**: Implemented superior Streamable HTTP transport for multi-client support and containerized deployment
+3. **Enhanced Developer Workflow**: Advanced git hooks and build processes adapted to the new modular structure
+4. **Production-Ready Deployment**: Docker containerization with health checks and resource management
 
-Most recently, we focused on:
-1. Creating a script that automatically generates TOOLS.md from the src/utils/tools-data.ts file
-2. Setting up a git pre-commit hook to regenerate TOOLS.md whenever tools-data.ts changes
-3. Ensuring proper anchor links in the TOOLS.md table of contents using GitHub-compatible formats
-4. Adding the MIT license file to formally license the project
-5. Updating the README.md to mention the project's origin and link to the tools documentation
+## Recent Major Achievement: Comprehensive Refactoring
+
+### Code Organization Breakthrough
+1. **Split massive tools-data.ts (1,396 lines)** into 7 focused definition files:
+   - `merge-requests.ts` (417 lines), `ci-cd.ts` (336 lines), `integrations.ts` (225 lines)
+   - No single file exceeds 450 lines, dramatically improving maintainability
+
+2. **Decomposed repository-handlers.ts (627 lines)** into 11 domain-specific modules:
+   - `repository/projects.ts`, `repository/branches.ts`, `merge-requests/crud.ts`, etc.
+   - Clear separation of concerns with focused responsibilities
+
+3. **Reorganized manager classes** into `src/services/managers/` directory:
+   - `cicd-manager.ts`, `integrations-manager.ts`, `users-groups-manager.ts`
+   - Clean dependency injection and interface consistency
+
+4. **Established new directory structure**:
+   - `src/tools/definitions/` - Tool schemas organized by domain
+   - `src/tools/handlers/` - Handler implementations by feature
+   - `src/services/managers/` - Business logic managers
+   - `src/server/` - Server implementations
+
+### Streamable HTTP Implementation
+- **Multi-client HTTP server** on port 3001 with `/mcp` endpoint
+- **Session management** with GitLab token-based authentication per request
+- **Health monitoring** with `/health` endpoint for container orchestration
+- **Docker containerization** with multi-stage builds and distroless runtime
+- **CORS support** and proper HTTP headers handling
+
+### Build Process Enhancement
+- **Updated git hooks** to work with modular structure (watches `src/tools/definitions/`)
+- **Enhanced documentation generation** from consolidated build outputs
+- **Verified deployment** with all 61 tools functional and accessible
 
 ## Recent Changes
-- Added a script (`scripts/generate-tools-md.js`) to convert tools-data.ts to TOOLS.md in a well-formatted markdown table
-- Created a pre-commit git hook that automatically regenerates TOOLS.md when tools-data.ts changes
-- Created a versioned copy of the git hook in the repository for other developers
-- Updated package.json to add an `install-hooks` script for easier hook installation
-- Updated README.md installation instructions to mention the git hooks
-- Fixed anchor link generation in TOOLS.md for sections with special characters, particularly:
-  - "Integrations & Webhooks" → "#integrations--webhooks"
-  - "User & Group Management" → "#user--group-management"
-- Added the MIT license file to the project
-- Updated README.md to mention that this is an extended version of the MCP GitLab server from the Model Context Protocol project
-- Restructured the README.md to use TOOLS.md as the source of truth for tool documentation
+- **Completed comprehensive refactoring** breaking down large files into focused modules
+- **Implemented Streamable HTTP server** replacing stdio-only communication
+- **Added Docker deployment** with health checks and resource limits
+- **Enhanced git hooks** to support new modular tool definition structure
+- **Updated TOOLS.md generation** to work with consolidated exports from build output
+- **Verified all 61 tools** are working correctly in deployed environment
+- **Fixed Dockerfile paths** to accommodate new server file location
+- **Added session-based authentication** for multi-client support
 
 ## Active Decisions
 
@@ -65,23 +88,23 @@ Most recently, we focused on:
 
 ## Next Steps
 
-### Short-term Tasks
-1. Complete unit tests for all tools
-2. Add support for pagination in list operations
-3. Support for wiki management
-4. Support for repository commits and tags
+### Short-term Optimization
+1. Performance monitoring and optimization of Streamable HTTP endpoints
+2. Enhanced logging and observability for production deployment
+3. Advanced caching strategies for frequently accessed GitLab resources
+4. Unit tests adapted to new modular architecture
 
-### Medium-term Goals
-1. Expand tool set to cover more GitLab API endpoints
-2. Implement caching for improved performance
-3. Add support for webhook callbacks
-4. Create helper functions for common operations
+### Medium-term Expansion
+1. Additional GitLab API coverage (wiki management, repository commits/tags)
+2. Advanced webhook callbacks and event handling
+3. GraphQL API integration for more efficient data fetching
+4. Enhanced resource streaming capabilities
 
-### Long-term Vision
-1. Support for GitLab GraphQL API
-2. Support for advanced authentication methods
-3. Implementation of resource streaming for large files
-4. Integration with CI/CD pipelines for automated testing and deployment
+### Long-term Platform Enhancement
+1. Multi-instance GitLab server management
+2. Advanced authentication methods (OAuth, SSO)
+3. Real-time collaboration features
+4. Performance analytics and usage metrics
 
 ## Open Questions
 1. How to handle GitLab API rate limiting effectively?

@@ -20,23 +20,35 @@
 ## Development Setup
 
 ### Prerequisites
-- Node.js (v16 or higher)
+- Node.js (v20 or higher) - for optimal performance
 - npm
+- Docker (for containerized deployment)
 - A GitLab account with API token
 
 ### Installation Steps
 1. Clone the repository
 2. Run `npm install` to install dependencies
-3. Run `npm run build` to compile TypeScript to JavaScript
-4. Configure GitLab API token in environment variables
+3. Run `npm run build` to compile modular TypeScript structure
+4. Run `npm run install-hooks` to set up git hooks for documentation sync
+5. Configure deployment method (Streamable HTTP recommended)
 
-### Environment Configuration
-Required environment variables:
+### Environment Configuration - Multi-Mode Support
+
+#### For Streamable HTTP Deployment (Recommended)
+No environment variables needed - authentication via HTTP headers:
+- `X-GitLab-Token`: GitLab API token per request
+- `X-GitLab-URL`: GitLab API URL per request (optional)
+
+#### For Legacy Stdio Mode
 - `GITLAB_API_TOKEN`: Personal access token from GitLab
 - `GITLAB_API_URL` (optional): URL for GitLab API, defaults to 'https://gitlab.com/api/v4'
 
-### Build Process
-The build process uses TypeScript compiler (tsc) to generate JavaScript files in the `build` directory. After compilation, the main executable file is made executable with chmod.
+### Enhanced Build Process
+- **Modular compilation**: TypeScript compiler processes 7 domain-specific definition files
+- **Consolidated exports**: Automatic consolidation in `build/tools/definitions/index.js`
+- **Server compilation**: Separate HTTP and stdio server builds
+- **Executable generation**: Server files made executable with chmod
+- **Documentation sync**: Git hooks automatically update TOOLS.md from build outputs
 
 ## Technical Constraints
 
@@ -70,10 +82,46 @@ The build process uses TypeScript compiler (tsc) to generate JavaScript files in
 - Integrates with MCP-compatible AI assistants
 - Provides tools and resources for GitLab operations
 
-## Deployment
+## Deployment - Superior Multi-Mode Options
 
-### Local Deployment
-Configure in MCP settings file for local AI assistant applications:
+### Production Deployment (Recommended) - Streamable HTTP
+**Docker containerized deployment** with superior capabilities:
+
+```bash
+# Deploy with Docker Compose
+docker compose up --build -d
+
+# Manual Docker deployment
+docker build -t mcp-gitlab .
+docker run -d -p 3001:3000 --name mcp-gitlab-server mcp-gitlab
+```
+
+**Configuration for Claude Code via mcp-remote:**
+```json
+{
+  "mcpServers": {
+    "sm-gitlab": {
+      "command": "npx",
+      "args": [
+        "mcp-remote@latest",
+        "http://host.docker.internal:3001/mcp",
+        "--allow-http",
+        "--header",
+        "X-GitLab-Token: ${GITLAB_TOKEN}",
+        "--header", 
+        "X-GitLab-URL: ${GITLAB_URL}"
+      ],
+      "env": {
+        "GITLAB_TOKEN": "your_gitlab_token",
+        "GITLAB_URL": "https://your-gitlab-instance.com/api/v4"
+      }
+    }
+  }
+}
+```
+
+### Legacy Local Deployment - Stdio Mode
+For MCP clients that only support stdio transport:
 
 #### For Cursor/Roo Cline
 ```json
@@ -81,9 +129,7 @@ Configure in MCP settings file for local AI assistant applications:
   "mcpServers": {
     "gitlab": {
       "command": "node",
-      "args": [
-        "/path/to/mcp-gitlab/build/index.js"
-      ],
+      "args": ["/path/to/mcp-gitlab/build/index.js"],
       "env": {
         "GITLAB_API_TOKEN": "YOUR_GITLAB_API_TOKEN",
         "GITLAB_API_URL": "https://gitlab.com/api/v4"
@@ -93,25 +139,10 @@ Configure in MCP settings file for local AI assistant applications:
 }
 ```
 
-#### For Claude Desktop
-```json
-{
-  "mcpServers": {
-    "gitlab": {
-      "command": "node",
-      "args": [
-        "/path/to/mcp-gitlab/build/index.js"
-      ],
-      "env": {
-        "GITLAB_API_TOKEN": "YOUR_GITLAB_API_TOKEN",
-        "GITLAB_API_URL": "https://gitlab.com/api/v4"
-      }
-    }
-  }
-}
-```
-
-### Production Deployment
-- Can be deployed as a service on a server
-- Configure with appropriate environment variables
-- Ensure security of API tokens in production environments
+### Production Deployment Features
+- **Multi-stage Docker builds** with distroless runtime for security
+- **Health monitoring** via `/health` endpoint for container orchestration
+- **Resource management** with CPU and memory limits
+- **Session isolation** supporting multiple concurrent clients
+- **CORS support** for web-based AI assistant integration
+- **Auto-restart policies** for high availability
