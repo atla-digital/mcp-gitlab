@@ -1,11 +1,14 @@
 #!/bin/sh
 
-# Pre-commit hook to automatically generate TOOLS.md from tools-data.ts
+# Pre-commit hook to automatically generate TOOLS.md from tool definition files
 echo "Running pre-commit hook to update TOOLS.md..."
 
-# Check if tools-data.ts has been modified
-if git diff --cached --name-only | grep -q "src/utils/tools-data.ts"; then
-  echo "src/utils/tools-data.ts has changed, regenerating TOOLS.md..."
+# Check if any tool definition files have been modified
+if git diff --cached --name-only | grep -E "(src/tools/definitions/|src/utils/tools-data.ts)"; then
+  echo "Tool definition files have changed, regenerating TOOLS.md..."
+  
+  # Build the project first to ensure latest compiled definitions
+  npm run build
   
   # Run the script to regenerate TOOLS.md
   node scripts/generate-tools-md.js

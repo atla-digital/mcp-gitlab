@@ -6,14 +6,14 @@
 
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 // Get current file path and directory
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Read tools-data.ts file
-const toolsDataPath = path.resolve(__dirname, '../src/utils/tools-data.ts');
+// Read tools definitions from the built version
+const toolsDataPath = path.resolve(__dirname, '../build/tools/definitions/index.js');
 const outputPath = path.resolve(__dirname, '../TOOLS.md');
 
 // Convert heading text to GitHub-compatible anchor
@@ -32,105 +32,40 @@ function generateAnchor(text) {
     .replace(/\s+/g, '-');    // Replace spaces with hyphens
 }
 
-try {
-  // Read the source file
-  const toolsData = fs.readFileSync(toolsDataPath, 'utf8');
+async function generateToolsMarkdown() {
+  try {
+    // Import the consolidated tool definitions dynamically
+    const toolsModule = await import(pathToFileURL(toolsDataPath).href);
+  const toolDefinitions = toolsModule.toolDefinitions;
   
-  // Extract tool definitions using regex
-  const toolDefinitionsRegex = /export const toolDefinitions = \[([\s\S]*?)\];/;
-  const match = toolsData.match(toolDefinitionsRegex);
-  
-  if (!match) {
-    console.error('Could not parse tool definitions from source file');
+  if (!toolDefinitions || !Array.isArray(toolDefinitions)) {
+    console.error('Could not load tool definitions from consolidated exports');
     process.exit(1);
   }
   
-  // Split into individual tool definitions
-  const toolDefinitions = [];
-  let toolsContent = match[1];
-  let braceCount = 0;
-  let currentTool = '';
-
-  // Extract individual tool definitions respecting nested objects
-  for (let i = 0; i < toolsContent.length; i++) {
-    const char = toolsContent[i];
-    currentTool += char;
-    
-    if (char === '{') {
-      braceCount++;
-    } else if (char === '}') {
-      braceCount--;
-      if (braceCount === 0 && i < toolsContent.length - 1) {
-        if (toolsContent[i+1] === ',') {
-          // Include the comma in the current tool definition
-          currentTool += toolsContent[i+1];
-          i++;
-        }
-        toolDefinitions.push(currentTool.trim());
-        currentTool = '';
-      }
-    }
-  }
-  
-  // Parse each tool definition
-  const tools = [];
-  
-  for (const toolDef of toolDefinitions) {
-    // Extract basic tool info
-    const nameMatch = toolDef.match(/name:\s*['"]([^'"]+)['"]/);
-    const descMatch = toolDef.match(/description:\s*['"]([^'"]+)['"]/);
-    
-    if (!nameMatch || !descMatch) continue;
-    
-    const name = nameMatch[1];
-    const description = descMatch[1];
-    
-    // Extract required parameters
-    const requiredMatch = toolDef.match(/required:\s*\[([\s\S]*?)\]/);
-    const required = requiredMatch ? 
-      (requiredMatch[1].match(/['"]([^'"]+)['"]/g) || []).map(r => r.replace(/['"]/g, '')) : 
-      [];
-    
-    // Extract properties
-    const propertiesMatch = toolDef.match(/properties:\s*{([\s\S]*?)}\s*,\s*(?:required:|type:)/);
-    if (!propertiesMatch) {
-      tools.push({
-        name,
-        description,
-        parameters: []
-      });
-      continue;
-    }
-    
-    const propertiesContent = propertiesMatch[1];
-    
-    // Parse individual parameters
+  // Convert tool definition objects to the format expected by the markdown generator
+  const tools = toolDefinitions.map(tool => {
     const parameters = [];
-    const paramMatches = [...propertiesContent.matchAll(/([a-zA-Z0-9_]+):\s*{([\s\S]*?)(?=\s*},\s*[a-zA-Z0-9_]+:|$)/g)];
     
-    for (const paramMatch of paramMatches) {
-      const paramName = paramMatch[1];
-      const paramContent = paramMatch[2];
+    if (tool.inputSchema && tool.inputSchema.properties) {
+      const required = tool.inputSchema.required || [];
       
-      const typeMatch = paramContent.match(/type:\s*['"]([^'"]+)['"]/);
-      const descMatch = paramContent.match(/description:\s*['"]([^'"]+)['"]/);
-      
-      if (typeMatch && descMatch) {
+      for (const [paramName, paramDef] of Object.entries(tool.inputSchema.properties)) {
         parameters.push({
           name: paramName,
-          type: typeMatch[1],
-          description: descMatch[1],
+          type: paramDef.type,
+          description: paramDef.description || '',
           required: required.includes(paramName)
         });
       }
     }
     
-    tools.push({
-      name,
-      description,
+    return {
+      name: tool.name,
+      description: tool.description,
       parameters
-    });
-  }
+    };
+  });
   
   // Generate markdown content
   let markdown = '# GitLab MCP Server Tools\n\n';
@@ -192,13 +127,17 @@ try {
   
   // Add footer
   markdown += '---\n\n';
-  markdown += 'Generated automatically from `src/utils/tools-data.ts`\n';
+  markdown += 'Generated automatically from `src/tools/definitions/`\n';
   
   // Write to TOOLS.md
   fs.writeFileSync(outputPath, markdown);
   console.log(`Successfully generated ${outputPath}`);
   
-} catch (error) {
-  console.error('Error generating markdown:', error);
-  process.exit(1);
+  } catch (error) {
+    console.error('Error generating markdown:', error);
+    process.exit(1);
+  }
 }
+
+// Run the function
+generateToolsMarkdown();
