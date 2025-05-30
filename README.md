@@ -71,47 +71,53 @@ npm run install-hooks
 
 This installs a pre-commit hook that automatically regenerates TOOLS.md when src/utils/tools-data.ts changes.
 
-5. Configure your GitLab API token:
+5. Deploy the server:
 
-You need to provide your GitLab API token in the MCP settings configuration file. The token is used to authenticate with the GitLab API.
+```bash
+docker compose up --build -d
+```
 
-For Cursor/Roo Cline, add the following to your MCP settings file (`~/Library/Application Support/Cursor/User/globalStorage/rooveterinaryinc.roo-cline/settings/cline_mcp_settings.json`):
+The server will be available at `http://localhost:3001/mcp`
+
+6. Configure your MCP client:
+
+This server implements **Streamable HTTP** as the primary MCP transport. For clients that don't support Streamable HTTP natively (like Claude Code), use `mcp-remote` as a proxy.
+
+### For Claude Code/Desktop
+Add the following to your MCP settings file (`~/.claude.json`):
 
 ```json
 {
   "mcpServers": {
-    "gitlab": {
-      "command": "node",
+    "sm-gitlab": {
+      "command": "npx",
       "args": [
-        "/path/to/mcp-gitlab/build/index.js"
+        "mcp-remote@latest",
+        "http://host.docker.internal:3001/mcp",
+        "--allow-http",
+        "--header",
+        "X-GitLab-Token: ${GITLAB_TOKEN}",
+        "--header",
+        "X-GitLab-URL: ${GITLAB_URL}"
       ],
       "env": {
-        "GITLAB_API_TOKEN": "YOUR_GITLAB_API_TOKEN",
-        "GITLAB_API_URL": "https://gitlab.com/api/v4"
+        "GITLAB_TOKEN": "YOUR_GITLAB_API_TOKEN",
+        "GITLAB_URL": "https://your-gitlab-instance.com/api/v4"
       }
     }
   }
 }
 ```
 
-For Claude Desktop, add the following to your MCP settings file (`~/Library/Application Support/Claude/claude_desktop_config.json`):
-
-```json
-{
-  "mcpServers": {
-    "gitlab": {
-      "command": "node",
-      "args": [
-        "/path/to/mcp-gitlab/build/index.js"
-      ],
-      "env": {
-        "GITLAB_API_TOKEN": "YOUR_GITLAB_API_TOKEN",
-        "GITLAB_API_URL": "https://gitlab.com/api/v4"
-      }
-    }
-  }
-}
+### For Streamable HTTP Compatible Clients
+Direct connection to the server:
 ```
+http://localhost:3001/mcp
+```
+
+Pass GitLab credentials as HTTP headers:
+- `X-GitLab-Token`: Your GitLab API token
+- `X-GitLab-URL`: Your GitLab API base URL (defaults to https://gitlab.com/api/v4)
 
 Replace `YOUR_GITLAB_API_TOKEN` with your actual GitLab API token. You can generate a token in your GitLab account under Settings > Access Tokens.
 

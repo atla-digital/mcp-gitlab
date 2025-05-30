@@ -1,0 +1,76 @@
+services:
+  # Streamable HTTP Server mode (default - multi-client support)
+  mcp-gitlab-http:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mcp-gitlab-http-server
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    ports:
+      - "3001:3000"
+    restart: unless-stopped
+    # Mount a volume for logs if needed
+    # volumes:
+    #   - ./logs:/app/logs
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
+    # Health check
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health", "||", "exit", "1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # MCP Server mode (for traditional MCP usage)
+  mcp-gitlab-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mcp-gitlab-mcp-server
+    environment:
+      - GITLAB_API_TOKEN=${GITLAB_API_TOKEN}
+      - GITLAB_API_URL=${GITLAB_API_URL:-https://gitlab.com/api/v4}
+      - NODE_ENV=production
+    command: [ "node", "build/index.js" ]
+    profiles:
+      - mcp
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
+    # Health check
+    healthcheck:
+      test: [ "CMD", "node", "-e", "process.exit(0)" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+  # Optional: Add nginx reverse proxy for production
+  # nginx:
+  #   image: nginx:alpine
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./ssl:/etc/nginx/ssl:ro
+  #   depends_on:
+  #     - mcp-gitlab-http
+  #   restart: unless-stopped
+  #   profiles:
+  #     - production

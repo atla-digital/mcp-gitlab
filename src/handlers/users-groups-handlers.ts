@@ -23,6 +23,14 @@ export const listUsers: ToolHandler = async (params, context) => {
 };
 
 /**
+ * Get current user handler
+ */
+export const getCurrentUser: ToolHandler = async (_params, context) => {
+  const response = await context.axiosInstance.get('/user');
+  return formatResponse(response.data);
+};
+
+/**
  * Get user handler
  */
 export const getUser: ToolHandler = async (params, context) => {

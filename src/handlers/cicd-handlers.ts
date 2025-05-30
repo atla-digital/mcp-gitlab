@@ -7,6 +7,84 @@ import { ToolHandler } from "../utils/handler-types.js";
 import { formatResponse } from "../utils/response-formatter.js";
 
 /**
+ * List pipelines handler
+ */
+export const listPipelines: ToolHandler = async (params, context) => {
+  const { project_id, ref, status, per_page } = params.arguments || {};
+  if (!project_id) {
+    throw new McpError(ErrorCode.InvalidParams, 'project_id is required');
+  }
+  
+  const response = await context.axiosInstance.get(
+    `/projects/${encodeURIComponent(String(project_id))}/pipelines`,
+    { params: { ref, status, per_page: per_page || 20 } }
+  );
+  return formatResponse(response.data);
+};
+
+/**
+ * Get pipeline handler
+ */
+export const getPipeline: ToolHandler = async (params, context) => {
+  const { project_id, pipeline_id } = params.arguments || {};
+  if (!project_id || !pipeline_id) {
+    throw new McpError(ErrorCode.InvalidParams, 'project_id and pipeline_id are required');
+  }
+  
+  const response = await context.axiosInstance.get(
+    `/projects/${encodeURIComponent(String(project_id))}/pipelines/${pipeline_id}`
+  );
+  return formatResponse(response.data);
+};
+
+/**
+ * Get pipeline jobs handler
+ */
+export const getPipelineJobs: ToolHandler = async (params, context) => {
+  const { project_id, pipeline_id, scope } = params.arguments || {};
+  if (!project_id || !pipeline_id) {
+    throw new McpError(ErrorCode.InvalidParams, 'project_id and pipeline_id are required');
+  }
+  
+  const response = await context.axiosInstance.get(
+    `/projects/${encodeURIComponent(String(project_id))}/pipelines/${pipeline_id}/jobs`,
+    { params: { scope } }
+  );
+  return formatResponse(response.data);
+};
+
+/**
+ * Get job log handler
+ */
+export const getJobLog: ToolHandler = async (params, context) => {
+  const { project_id, job_id } = params.arguments || {};
+  if (!project_id || !job_id) {
+    throw new McpError(ErrorCode.InvalidParams, 'project_id and job_id are required');
+  }
+  
+  const response = await context.axiosInstance.get(
+    `/projects/${encodeURIComponent(String(project_id))}/jobs/${job_id}/trace`,
+    { headers: { 'Accept': 'text/plain' } }
+  );
+  return formatResponse({ log: response.data });
+};
+
+/**
+ * Retry job handler
+ */
+export const retryJob: ToolHandler = async (params, context) => {
+  const { project_id, job_id } = params.arguments || {};
+  if (!project_id || !job_id) {
+    throw new McpError(ErrorCode.InvalidParams, 'project_id and job_id are required');
+  }
+  
+  const response = await context.axiosInstance.post(
+    `/projects/${encodeURIComponent(String(project_id))}/jobs/${job_id}/retry`
+  );
+  return formatResponse(response.data);
+};
+
+/**
  * List trigger tokens handler
  */
 export const listTriggerTokens: ToolHandler = async (params, context) => {

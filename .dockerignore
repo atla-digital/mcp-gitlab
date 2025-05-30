@@ -1,0 +1,64 @@
+# Node modules
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output (will be built inside container)
+build
+
+# Development files
+.git
+.gitignore
+README.md
+TOOLS.md
+CLAUDE.md
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage
+
+# Docker files (avoid recursion)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Memory bank (development context)
+memory-bank/
+
+# Git hooks
+git-hooks/
+
+# Test files
+test.js
+*.test.js
+*.spec.js
+
+# Documentation
+*.md
+!package.json
