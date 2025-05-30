@@ -12,14 +12,12 @@ import {
 import { randomUUID } from 'crypto';
 import axios, { AxiosInstance } from 'axios';
 import { IncomingMessage, ServerResponse } from 'http';
-import { IntegrationsManager } from './integrations.js';
-import { CiCdManager } from './ci-cd.js';
-import { UsersGroupsManager } from './users-groups.js';
-import { toolRegistry } from "./utils/tool-registry.js";
-import { toolDefinitions } from "./utils/tools-data.js";
-import { handleListResources, handleReadResource } from "./utils/resource-handlers.js";
-import { handleApiError } from "./utils/response-formatter.js";
-import type { HandlerContext } from './utils/handler-types.js';
+import { IntegrationsManager, CiCdManager, UsersGroupsManager } from '../services/managers/index.js';
+import { toolRegistry } from "../utils/tool-registry.js";
+import { toolDefinitions } from "../utils/tools-data.js";
+import { handleListResources, handleReadResource } from "../utils/resource-handlers.js";
+import { handleApiError } from "../utils/response-formatter.js";
+import type { HandlerContext } from '../utils/handler-types.js';
 
 interface SessionData {
   gitlabApiToken: string;

@@ -42,11 +42,11 @@ export const updateSlackIntegration: ToolHandler = async (params, context) => {
   }
   
   const data = await context.integrationsManager.updateSlackIntegration(project_id as string | number, {
-    webhook,
-    username,
-    channel,
-    notify_only_broken_pipelines,
-    notify_only_default_branch,
+    webhook: webhook as string,
+    username: username as string | undefined,
+    channel: channel as string | undefined,
+    notify_only_broken_pipelines: notify_only_broken_pipelines as boolean | undefined,
+    notify_only_default_branch: notify_only_default_branch as boolean | undefined,
     ...options
   });
   return formatResponse(data);
@@ -193,8 +193,7 @@ export const testWebhook: ToolHandler = async (params, context) => {
   
   const data = await context.integrationsManager.testWebhook(
     project_id as string | number, 
-    webhook_id as number, 
-    (trigger_type as string) || 'push_events'
+    webhook_id as number
   );
   return formatResponse(data);
 }; 

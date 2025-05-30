@@ -4,9 +4,7 @@
 
 import { AxiosInstance } from "axios";
 import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
-import { IntegrationsManager } from "../integrations.js";
-import { CiCdManager } from "../ci-cd.js";
-import { UsersGroupsManager } from "../users-groups.js";
+import { IntegrationsManager, CiCdManager, UsersGroupsManager } from "../services/managers/index.js";
 
 /**
  * Context object passed to all tool handlers

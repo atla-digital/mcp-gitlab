@@ -96,7 +96,7 @@ export const addGroupMember: ToolHandler = async (params, context) => {
     group_id as string | number,
     user_id as number,
     access_level as number,
-    expires_at as string | undefined
+    expires_at ? { expires_at: expires_at as string } : {}
   );
   return formatResponse(data);
 };
@@ -127,7 +127,7 @@ export const addProjectMember: ToolHandler = async (params, context) => {
     project_id as string | number,
     user_id as number,
     access_level as number,
-    expires_at as string | undefined
+    expires_at ? { expires_at: expires_at as string } : {}
   );
   return formatResponse(data);
 }; 

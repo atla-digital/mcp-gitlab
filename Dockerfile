@@ -51,4 +51,4 @@ ENV NODE_ENV=production
 ENV PORT=3000
 
 # Start the Streamable HTTP server by default (recommended for multi-client support)
-CMD ["build/streamable-http-server.js"]
+CMD ["build/server/streamable-http-server.js"]

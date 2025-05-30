@@ -20,9 +20,7 @@ import {
 import axios, { AxiosInstance } from "axios";
 
 // Import manager classes
-import { IntegrationsManager } from "./integrations.js";
-import { CiCdManager } from "./ci-cd.js";
-import { UsersGroupsManager } from "./users-groups.js";
+import { IntegrationsManager, CiCdManager, UsersGroupsManager } from "./services/managers/index.js";
 
 // Import utility modules
 import { toolRegistry } from "./utils/tool-registry.js";

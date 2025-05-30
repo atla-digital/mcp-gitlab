@@ -1,0 +1,122 @@
+/**
+ * Issue tool definitions
+ */
+
+export const issueToolDefinitions = [
+  {
+    name: 'gitlab_list_issues',
+    description: 'List issues in a GitLab project',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project_id: {
+          type: 'string',
+          description: 'The ID or URL-encoded path of the project'
+        },
+        state: {
+          type: 'string',
+          description: 'Return issues with specified state (opened, closed)',
+          enum: ['opened', 'closed']
+        },
+        labels: {
+          type: 'string',
+          description: 'Comma-separated list of label names'
+        }
+      },
+      required: ['project_id']
+    }
+  },
+  {
+    name: 'gitlab_create_issue',
+    description: 'Create a new issue in a GitLab project',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project_id: {
+          type: 'string',
+          description: 'The ID or URL-encoded path of the project'
+        },
+        title: {
+          type: 'string',
+          description: 'The title of the issue'
+        },
+        description: {
+          type: 'string',
+          description: 'The description of the issue'
+        },
+        labels: {
+          type: 'string',
+          description: 'Comma-separated list of label names'
+        },
+        assignee_ids: {
+          type: 'array',
+          items: { type: 'number' },
+          description: 'IDs of users to assign the issue to'
+        },
+        confidential: {
+          type: 'boolean',
+          description: 'Whether the issue should be confidential'
+        }
+      },
+      required: ['project_id', 'title']
+    }
+  },
+  {
+    name: 'gitlab_get_issue',
+    description: 'Get specific issue details',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project_id: {
+          type: 'string',
+          description: 'The ID or URL-encoded path of the project'
+        },
+        issue_iid: {
+          type: 'number',
+          description: 'The internal ID of the issue'
+        }
+      },
+      required: ['project_id', 'issue_iid']
+    }
+  },
+  {
+    name: 'gitlab_update_issue',
+    description: 'Update issue details (assign, labels, status, etc.)',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project_id: {
+          type: 'string',
+          description: 'The ID or URL-encoded path of the project'
+        },
+        issue_iid: {
+          type: 'number',
+          description: 'The internal ID of the issue'
+        },
+        title: {
+          type: 'string',
+          description: 'The title of the issue'
+        },
+        description: {
+          type: 'string',
+          description: 'The description of the issue'
+        },
+        assignee_ids: {
+          type: 'array',
+          items: { type: 'number' },
+          description: 'IDs of users to assign the issue to'
+        },
+        labels: {
+          type: 'string',
+          description: 'Comma-separated list of label names'
+        },
+        state_event: {
+          type: 'string',
+          description: 'State event (close or reopen)',
+          enum: ['close', 'reopen']
+        }
+      },
+      required: ['project_id', 'issue_iid']
+    }
+  }
+];
