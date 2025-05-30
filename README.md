@@ -1,10 +1,6 @@
 # GitLab MCP Server
 
-A Model Context Protocol (MCP) server that enables you to interact with your GitLab account. Get diffs, analyze merge requests, review code, cherry-pick changes, and more. This is an extended version of the [MCP GitLab Server](https://github.com/modelcontextprotocol/servers/tree/main/src/gitlab) from the Model Context Protocol project.
-
-<a href="https://glama.ai/mcp/servers/@rifqi96/mcp-gitlab">
-  <img width="380" height="200" src="https://glama.ai/mcp/servers/@rifqi96/mcp-gitlab/badge" alt="GitLab Server MCP server" />
-</a>
+A Model Context Protocol (MCP) server that enables you to interact with your GitLab account. Get diffs, analyze merge requests, review code, cherry-pick changes, and more.
 
 ## Features
 
@@ -42,10 +38,10 @@ The easiest way to run the GitLab MCP Server is using the pre-built Docker image
 
 ```bash
 # Pull the latest image
-docker pull ghcr.io/rifqi96/mcp-gitlab:latest
+docker pull ghcr.io/atla-digital/mcp-gitlab:latest
 
 # Run the container
-docker run -d -p 3001:3000 --name mcp-gitlab-server ghcr.io/rifqi96/mcp-gitlab:latest
+docker run -d -p 3001:3000 --name mcp-gitlab-server ghcr.io/atla-digital/mcp-gitlab:latest
 ```
 
 The server will be available at `http://localhost:3001/mcp`
@@ -57,7 +53,7 @@ Create a `docker-compose.yml` file:
 ```yaml
 services:
   mcp-gitlab:
-    image: ghcr.io/rifqi96/mcp-gitlab:latest
+    image: ghcr.io/atla-digital/mcp-gitlab:latest
     ports:
       - "3001:3000"
     restart: unless-stopped
@@ -84,7 +80,7 @@ If you want to build from source or contribute to the project:
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/rifqi96/mcp-gitlab.git
+git clone https://github.com/atla-digital/mcp-gitlab.git
 cd mcp-gitlab
 ```
 
@@ -168,10 +164,10 @@ docker stop mcp-gitlab-server
 docker rm mcp-gitlab-server
 
 # Pull the latest image
-docker pull ghcr.io/rifqi96/mcp-gitlab:latest
+docker pull ghcr.io/atla-digital/mcp-gitlab:latest
 
 # Run with the new image
-docker run -d -p 3001:3000 --name mcp-gitlab-server ghcr.io/rifqi96/mcp-gitlab:latest
+docker run -d -p 3001:3000 --name mcp-gitlab-server ghcr.io/atla-digital/mcp-gitlab:latest
 ```
 
 Or if using Docker Compose:
