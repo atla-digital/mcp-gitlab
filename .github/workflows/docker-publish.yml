@@ -2,7 +2,7 @@ name: Build and Publish Docker Image
 
 on:
   push:
-    branches: [ feature/github-actions-docker-publish ]
+    branches: [ main ]
   release:
     types: [ published ]
 
@@ -43,7 +43,7 @@ jobs:
           type=ref,event=pr
           type=semver,pattern={{version}}
           type=semver,pattern={{major}}.{{minor}}
-          type=raw,value=test-latest,enable=${{ github.ref == 'refs/heads/feature/github-actions-docker-publish' }}
+          type=raw,value=latest,enable={{is_default_branch}}
 
     - name: Build and push Docker image
       id: build-and-push
