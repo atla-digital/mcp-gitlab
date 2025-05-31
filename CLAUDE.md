@@ -60,6 +60,50 @@ The server implements the Streamable HTTP MCP transport protocol, running as an 
 ### Resource System
 The server exposes GitLab projects as MCP resources via `gitlab://projects` URI, handled by `src/utils/resource-handlers.ts`.
 
+### MCP Prompts for Workflow Guidance
+
+This GitLab MCP server supports **MCP Prompts** - reusable workflow templates that provide step-by-step guidance for complex GitLab operations.
+
+#### Available Prompts
+
+**`quick-mr-review`** - A simple merge request review workflow
+- **Arguments**: `project_id` (required), `merge_request_iid` (required)
+- **Purpose**: Demonstrates multi-step GitLab operations for code review
+- **Steps**: Get MR details → Get changes → Review → Add comments
+
+#### Using Prompts
+
+1. **List available prompts:**
+   ```json
+   {"jsonrpc": "2.0", "id": 1, "method": "prompts/list", "params": {}}
+   ```
+
+2. **Get prompt with parameters:**
+   ```json
+   {
+     "jsonrpc": "2.0", 
+     "id": 1, 
+     "method": "prompts/get", 
+     "params": {
+       "name": "quick-mr-review",
+       "arguments": {
+         "project_id": "web/runner",
+         "merge_request_iid": "5"
+       }
+     }
+   }
+   ```
+
+#### Workflow Integration
+
+Prompts provide templates that guide you through multi-step operations:
+- **Structured guidance** for complex workflows
+- **Parameter substitution** for specific projects/MRs
+- **Tool chaining** examples showing how to combine multiple GitLab tools
+- **Best practices** for common development tasks
+
+This standardizes how AI agents can access workflow knowledge and ensures consistent, reliable execution of complex GitLab operations.
+
 ### Client Configuration
 
 #### For Streamable HTTP Compatible Clients

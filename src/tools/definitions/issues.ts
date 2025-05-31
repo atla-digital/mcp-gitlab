@@ -118,5 +118,77 @@ export const issueToolDefinitions = [
       },
       required: ['project_id', 'issue_iid']
     }
+  },
+  {
+    name: 'gitlab_list_issue_links',
+    description: 'List linked issues for a specific issue',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project_id: {
+          type: 'string',
+          description: 'The ID or URL-encoded path of the project'
+        },
+        issue_iid: {
+          type: 'number',
+          description: 'The internal ID of the issue'
+        }
+      },
+      required: ['project_id', 'issue_iid']
+    }
+  },
+  {
+    name: 'gitlab_create_issue_link',
+    description: 'Create a link between two issues (parent-child, blocking, related)',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project_id: {
+          type: 'string',
+          description: 'The ID or URL-encoded path of the project'
+        },
+        issue_iid: {
+          type: 'number',
+          description: 'The internal ID of the source issue'
+        },
+        target_project_id: {
+          type: 'string',
+          description: 'The ID or URL-encoded path of the target project'
+        },
+        target_issue_iid: {
+          type: 'number',
+          description: 'The internal ID of the target issue to link'
+        },
+        link_type: {
+          type: 'string',
+          description: 'The type of link relationship',
+          enum: ['relates_to', 'blocks', 'is_blocked_by'],
+          default: 'relates_to'
+        }
+      },
+      required: ['project_id', 'issue_iid', 'target_project_id', 'target_issue_iid']
+    }
+  },
+  {
+    name: 'gitlab_delete_issue_link',
+    description: 'Remove a link between two issues',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project_id: {
+          type: 'string',
+          description: 'The ID or URL-encoded path of the project'
+        },
+        issue_iid: {
+          type: 'number',
+          description: 'The internal ID of the source issue'
+        },
+        issue_link_id: {
+          type: 'number',
+          description: 'The ID of the issue link to delete'
+        }
+      },
+      required: ['project_id', 'issue_iid', 'issue_link_id']
+    }
   }
 ];

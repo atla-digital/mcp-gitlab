@@ -47,6 +47,9 @@ export const toolRegistry: ToolRegistry = {
   gitlab_create_issue: issueHandlers.createIssue,
   gitlab_get_issue: issueHandlers.getIssue,
   gitlab_update_issue: issueHandlers.updateIssue,
+  gitlab_list_issue_links: issueHandlers.listIssueLinks,
+  gitlab_create_issue_link: issueHandlers.createIssueLink,
+  gitlab_delete_issue_link: issueHandlers.deleteIssueLink,
 
   // Integration tools
   gitlab_list_integrations: integrationHandlers.listIntegrations,

@@ -112,7 +112,7 @@ export const repositoryToolDefinitions = [
       properties: {
         remote_url: {
           type: 'string',
-          description: 'Git remote URL (e.g., git@gitlab.com:group/project.git or https://gitlab.com/group/project.git)'
+          description: 'Raw Git remote URL - pass the actual URL string, not a bash command (e.g., git@gitlab.com:group/project.git or https://gitlab.com/group/project.git)'
         }
       },
       required: ['remote_url']

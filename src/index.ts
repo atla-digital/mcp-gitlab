@@ -14,6 +14,8 @@ import {
   ListResourcesRequestSchema,
   ListToolsRequestSchema,
   ReadResourceRequestSchema,
+  ListPromptsRequestSchema,
+  GetPromptRequestSchema,
   ErrorCode,
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
@@ -25,6 +27,7 @@ import { IntegrationsManager, CiCdManager, UsersGroupsManager } from "./services
 // Import utility modules
 import { toolRegistry } from "./utils/tool-registry.js";
 import { toolDefinitions } from "./utils/tools-data.js";
+import { promptDefinitions, promptTemplates } from "./utils/prompts-data.js";
 import { handleListResources, handleReadResource } from "./utils/resource-handlers.js";
 import { handleApiError } from "./utils/response-formatter.js";
 import { HandlerContext } from "./utils/handler-types.js";
@@ -62,8 +65,11 @@ class GitLabServer {
           canCallTools: true,
           canListResources: true,
           canReadResources: true,
+          canListPrompts: true,
+          canGetPrompts: true,
           tools: { listChanged: false }, // Enable tools capability with proper structure
-          resources: { listChanged: false } // Enable resources capability with proper structure
+          resources: { listChanged: false }, // Enable resources capability with proper structure
+          prompts: { listChanged: false } // Enable prompts capability
         }
       }
     );
@@ -112,6 +118,49 @@ class GitLabServer {
     // Read GitLab resources
     this.server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
       return handleReadResource(request.params.uri, this.axiosInstance);
+    });
+
+    // List available prompts
+    this.server.setRequestHandler(ListPromptsRequestSchema, async () => {
+      return {
+        prompts: promptDefinitions
+      };
+    });
+
+    // Get specific prompt content
+    this.server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+      const promptName = request.params.name;
+      const template = promptTemplates[promptName];
+      
+      if (!template) {
+        throw new McpError(ErrorCode.InvalidRequest, `Unknown prompt: ${promptName}`);
+      }
+
+      let content = template;
+      
+      // Replace argument placeholders if arguments are provided
+      if (request.params.arguments) {
+        for (const [key, value] of Object.entries(request.params.arguments)) {
+          const placeholder = `{{${key}}}`;
+          content = content.replace(new RegExp(placeholder, 'g'), String(value));
+        }
+      }
+      
+      // Remove any remaining unused placeholders (especially for optional parameters)
+      content = content.replace(/\{\{additional_instructions\}\}\s*/g, '');
+
+      return {
+        description: promptDefinitions.find(p => p.name === promptName)?.description || "",
+        messages: [
+          {
+            role: "user" as const,
+            content: {
+              type: "text" as const,
+              text: content
+            }
+          }
+        ]
+      };
     });
 
     // Call GitLab tools

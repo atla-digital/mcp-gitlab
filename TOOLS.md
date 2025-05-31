@@ -79,7 +79,7 @@ Extract GitLab project ID from git remote URL
 
 | Name | Type | Required | Description |
 | ---- | ---- | -------- | ----------- |
-| `remote_url` | `string` | Yes | Git remote URL (e.g., git@gitlab.com:group/project.git or https://gitlab.com/group/project.git) |
+| `remote_url` | `string` | Yes | Raw Git remote URL - pass the actual URL string, not a bash command (e.g., git@gitlab.com:group/project.git or https://gitlab.com/group/project.git) |
 
 ### gitlab_create_branch
 
@@ -313,6 +313,43 @@ Update issue details (assign, labels, status, etc.)
 | `assignee_ids` | `array` | No | IDs of users to assign the issue to |
 | `labels` | `string` | No | Comma-separated list of label names |
 | `state_event` | `string` | No | State event (close or reopen) |
+
+### gitlab_list_issue_links
+
+List linked issues for a specific issue
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `project_id` | `string` | Yes | The ID or URL-encoded path of the project |
+| `issue_iid` | `number` | Yes | The internal ID of the issue |
+
+### gitlab_create_issue_link
+
+Create a link between two issues (parent-child, blocking, related)
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `project_id` | `string` | Yes | The ID or URL-encoded path of the project |
+| `issue_iid` | `number` | Yes | The internal ID of the source issue |
+| `target_project_id` | `string` | Yes | The ID or URL-encoded path of the target project |
+| `target_issue_iid` | `number` | Yes | The internal ID of the target issue to link |
+| `link_type` | `string` | No | The type of link relationship |
+
+### gitlab_delete_issue_link
+
+Remove a link between two issues
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+| ---- | ---- | -------- | ----------- |
+| `project_id` | `string` | Yes | The ID or URL-encoded path of the project |
+| `issue_iid` | `number` | Yes | The internal ID of the source issue |
+| `issue_link_id` | `number` | Yes | The ID of the issue link to delete |
 
 ### gitlab_list_project_members
 

@@ -6,6 +6,8 @@ import {
   ListResourcesRequestSchema,
   ListToolsRequestSchema,
   ReadResourceRequestSchema,
+  ListPromptsRequestSchema,
+  GetPromptRequestSchema,
   ErrorCode,
   McpError,
 } from "@modelcontextprotocol/sdk/types.js";
@@ -15,6 +17,7 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { IntegrationsManager, CiCdManager, UsersGroupsManager } from '../services/managers/index.js';
 import { toolRegistry } from "../utils/tool-registry.js";
 import { toolDefinitions } from "../utils/tools-data.js";
+import { promptDefinitions, promptTemplates } from "../utils/prompts-data.js";
 import { handleListResources, handleReadResource } from "../utils/resource-handlers.js";
 import { handleApiError } from "../utils/response-formatter.js";
 import type { HandlerContext } from '../utils/handler-types.js';
@@ -56,8 +59,11 @@ class GitLabStreamableHttpServer {
           canCallTools: true,
           canListResources: true,
           canReadResources: true,
+          canListPrompts: true,
+          canGetPrompts: true,
           tools: { listChanged: false },
-          resources: { listChanged: false }
+          resources: { listChanged: false },
+          prompts: { listChanged: false }
         }
       }
     );
@@ -148,6 +154,49 @@ class GitLabStreamableHttpServer {
       return handleReadResource(request.params.uri, this.currentSessionData.handlerContext.axiosInstance);
     });
 
+    // List available prompts
+    this.server.setRequestHandler(ListPromptsRequestSchema, async () => {
+      return {
+        prompts: promptDefinitions
+      };
+    });
+
+    // Get specific prompt content
+    this.server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+      const promptName = request.params.name;
+      const template = promptTemplates[promptName];
+      
+      if (!template) {
+        throw new McpError(ErrorCode.InvalidRequest, `Unknown prompt: ${promptName}`);
+      }
+
+      let content = template;
+      
+      // Replace argument placeholders if arguments are provided
+      if (request.params.arguments) {
+        for (const [key, value] of Object.entries(request.params.arguments)) {
+          const placeholder = `{{${key}}}`;
+          content = content.replace(new RegExp(placeholder, 'g'), String(value));
+        }
+      }
+      
+      // Remove any remaining unused placeholders (especially for optional parameters)
+      content = content.replace(/\{\{additional_instructions\}\}\s*/g, '');
+
+      return {
+        description: promptDefinitions.find(p => p.name === promptName)?.description || "",
+        messages: [
+          {
+            role: "user" as const,
+            content: {
+              type: "text" as const,
+              text: content
+            }
+          }
+        ]
+      };
+    });
+
     // Call GitLab tools
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       try {
@@ -203,7 +252,9 @@ class GitLabStreamableHttpServer {
           const parsedBody = body ? JSON.parse(body) : undefined;
           
           if (!parsedBody || !parsedBody.method || 
-              (parsedBody.method !== 'initialize' && parsedBody.method !== 'tools/list')) {
+              (parsedBody.method !== 'initialize' && 
+               parsedBody.method !== 'tools/list' && 
+               parsedBody.method !== 'prompts/list')) {
             res.writeHead(401, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ 
               error: 'GitLab API token required',
