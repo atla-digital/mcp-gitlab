@@ -10,6 +10,32 @@ import { integrationToolDefinitions } from './integrations.js';
 import { usersGroupsToolDefinitions } from './users-groups.js';
 
 /**
+ * Workflow prompt tool definition
+ */
+const promptToolDefinition = {
+  name: 'gitlab_get_prompt',
+  description: 'Get a specific workflow prompt template with parameters substituted. Essential for workflow resumption after context compaction.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      name: {
+        type: 'string',
+        description: 'The name of the prompt to retrieve (e.g., "analyze-issue", "work-on-mr", "code-review")',
+        enum: ['analyze-issue', 'work-on-mr', 'code-review']
+      },
+      arguments: {
+        type: 'object',
+        description: 'Optional arguments to substitute in the prompt template (e.g., {"additional_instructions": "focus on security"})',
+        additionalProperties: {
+          type: 'string'
+        }
+      }
+    },
+    required: ['name']
+  }
+};
+
+/**
  * All tool definitions combined
  */
 export const toolDefinitions = [
@@ -18,7 +44,8 @@ export const toolDefinitions = [
   ...issueToolDefinitions,
   ...cicdToolDefinitions,
   ...integrationToolDefinitions,
-  ...usersGroupsToolDefinitions
+  ...usersGroupsToolDefinitions,
+  promptToolDefinition
 ];
 
 // Export individual category arrays for easier selection

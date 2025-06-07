@@ -11,6 +11,7 @@ import { repositoryHandlers, mergeRequestHandlers, issueHandlers } from "../tool
 import * as integrationHandlers from "../handlers/integration-handlers.js";
 import * as cicdHandlers from "../handlers/cicd-handlers.js";
 import * as usersGroupsHandlers from "../handlers/users-groups-handlers.js";
+import * as promptHandlers from "../handlers/prompt-handlers.js";
 
 /**
  * Registry of all available tools mapped to their handler functions
@@ -90,5 +91,8 @@ export const toolRegistry: ToolRegistry = {
   gitlab_list_group_members: usersGroupsHandlers.listGroupMembers,
   gitlab_add_group_member: usersGroupsHandlers.addGroupMember,
   gitlab_list_project_members: usersGroupsHandlers.listProjectMembers,
-  gitlab_add_project_member: usersGroupsHandlers.addProjectMember
+  gitlab_add_project_member: usersGroupsHandlers.addProjectMember,
+
+  // Workflow prompt tools
+  gitlab_get_prompt: promptHandlers.getPrompt
 }; 

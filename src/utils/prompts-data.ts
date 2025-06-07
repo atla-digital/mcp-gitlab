@@ -43,7 +43,7 @@ export const promptDefinitions: PromptDefinition[] = [
   },
   {
     name: "code-review",
-    description: "Comprehensive workflow for conducting thorough, constructive code reviews on GitLab merge requests with emphasis on line-specific feedback",
+    description: "Comprehensive workflow for conducting thorough, constructive code reviews on GitLab merge requests with emphasis on line-specific feedback and merge execution when criteria are met and suggestions implemented",
     arguments: [
       {
         name: "additional_instructions",
@@ -61,6 +61,29 @@ export const promptTemplates: Record<string, string> = {
   "analyze-issue": `# Issue Analysis & Action Planning Workflow
 
 This workflow helps analyze GitLab issues and determine the most appropriate course of action, which may result in zero, one, or multiple outcomes.
+
+## 🔄 Context Compaction Detection & Recovery
+
+**CRITICAL**: If you notice your conversation context has been compacted/truncated and you've lost track of:
+- Your current workflow progress
+- Which step you were on
+- What parameters were being used
+- What work has been completed
+
+**IMMEDIATELY** use this tool to restore your workflow context:
+\`\`\`
+gitlab_get_prompt({"name": "analyze-issue", "arguments": {"additional_instructions": "[your original instructions here]"}})
+\`\`\`
+
+Then review the full workflow content and determine where you left off based on:
+- Your git status and current branch
+- Any existing merge requests or issues you were working on  
+- Comments and progress made in GitLab
+- Files that have been modified locally
+
+**Resume from the appropriate step** - do not restart the entire workflow unless necessary.
+
+---
 
 {{additional_instructions}}
 
@@ -101,19 +124,22 @@ Before starting any GitLab workflow, establish your current context:
 
 ## Step-by-step Process:
 
-### 1. **Issue Discovery & Selection**
+### 1. **Issue Discovery & Selection** ✅📍 STEP 1
    - Use: \`gitlab_list_issues\` with project_id and state="opened" to see available issues
    - Select 1-3 promising issues for deeper analysis
+   - **PROGRESS MARKER**: Mark this step complete when you have identified specific issues to analyze
 
-### 2. **Issue Deep Analysis**
+### 2. **Issue Deep Analysis** ✅📍 STEP 2
    For each selected issue:
    - Use: \`gitlab_get_issue\` to get complete issue details
    - Use: \`gitlab_list_issue_links\` to check for existing relationships (parent, child, blocking issues)
    - Analyze the problem statement, requirements, and any existing comments
    - Assess complexity, scope, and business impact
+   - **PROGRESS MARKER**: Mark this step complete when you have thoroughly analyzed all selected issues
 
-### 3. **Determine Action Category**
+### 3. **Determine Action Category** ✅📍 STEP 3
    Based on your analysis, categorize each issue:
+   - **PROGRESS MARKER**: Mark this step complete when you have categorized all analyzed issues
 
    **🗣️ Discussion/Advice Only**
    - Issue needs clarification or guidance
@@ -130,7 +156,8 @@ Before starting any GitLab workflow, establish your current context:
    - Multiple independent components or features
    - Benefits from incremental delivery
 
-### 4. **Document Analysis Results**
+### 4. **Document Analysis Results** ✅📍 STEP 4
+   - **PROGRESS MARKER**: Mark this step complete when you have documented outcomes for all issues
 
    **For Discussion/Advice Issues:**
    - Add clarifying comments to the issue explaining the guidance or resolution
@@ -170,11 +197,12 @@ Before starting any GitLab workflow, establish your current context:
    - Request specific information or clarification needed
    - Set appropriate labels or assignees for follow-up
 
-### 5. **Document Decisions & Rationale**
+### 5. **Document Decisions & Rationale** ✅📍 STEP 5
    - Clearly communicate your analysis reasoning
    - Document why you chose the specific approach
    - Provide strategic guidance for development teams
    - Leave implementation details for the actual development phase
+   - **PROGRESS MARKER**: Mark this step complete when you have documented all decisions and rationale
 
 ## Analysis Guidelines:
 
@@ -209,11 +237,47 @@ Your analysis should result in clear, actionable recommendations:
 
 **IMPORTANT**: This workflow is for analysis and issue management only. Create branches and merge requests as development infrastructure, but do not implement actual code. Implementation will be created using the "work-on-mr" workflow, so do not implement anything now.
 
-Begin by exploring available issues, then apply systematic analysis to determine the most appropriate recommendation for each.`,
+Begin by exploring available issues, then apply systematic analysis to determine the most appropriate recommendation for each.
+
+## 🎯 Execute This Workflow Now
+
+**Please perform this issue analysis workflow immediately:**
+
+1. **Start the workflow** by discovering the project context and identifying issues to analyze
+2. **Execute each step systematically** following the process outlined above
+3. **Analyze selected issues** and categorize them appropriately
+4. **Document your analysis** and create the necessary infrastructure (branches, MRs, issue links)
+5. **Complete the process** by implementing your recommendations
+
+**This is a request to perform the issue analysis workflow - please begin now.**`,
 
   "work-on-mr": `# Work on Merge Request Workflow
 
 This comprehensive workflow handles both initial implementation and implementing review suggestions based on the current state of your merge request.
+
+## 🔄 Context Compaction Detection & Recovery
+
+**CRITICAL**: If you notice your conversation context has been compacted/truncated and you've lost track of:
+- Your current workflow progress
+- Which implementation step you were on
+- What MR you were working on
+- What review feedback you were addressing
+
+**IMMEDIATELY** use this tool to restore your workflow context:
+\`\`\`
+gitlab_get_prompt({"name": "work-on-mr", "arguments": {"additional_instructions": "[your original instructions here]"}})
+\`\`\`
+
+Then review the full workflow content and determine where you left off based on:
+- Your git status and current branch
+- Current merge request state and discussions
+- CI/CD pipeline status
+- Files that have been modified locally
+- Any pending review feedback
+
+**Resume from the appropriate step** - do not restart the entire workflow unless necessary.
+
+---
 
 {{additional_instructions}}
 
@@ -253,18 +317,21 @@ Before starting any GitLab workflow, establish your current context:
 
 ## 🔧 Pre-Work Setup & State Assessment
 
-### 1. **Environment Verification**
+### 1. **Environment Verification** ✅📍 STEP 1
    - Verify you're on the correct feature branch (not main/master)
    - Ensure working directory is clean (no uncommitted changes)
    - Complete the Discovery & Context Assessment above
+   - **PROGRESS MARKER**: Mark this step complete when environment is verified and context is established
 
-### 2. **Current State Analysis**
+### 2. **Current State Analysis** ✅📍 STEP 2
    - Use your discovered MR (if exists) to understand current implementation state
    - Use: \`gitlab_get_merge_request_changes\` to see what's already implemented
    - Check for discussions/suggestions: Review any existing feedback or comments
+   - **PROGRESS MARKER**: Mark this step complete when you understand the current state and have determined your workflow path
 
-### 3. **Determine Workflow Path**
+### 3. **Determine Workflow Path** ✅📍 STEP 3
    Based on your analysis, choose the appropriate path:
+   - **PROGRESS MARKER**: Mark this step complete when you have selected your workflow path (initial implementation, review response, or iterative development)
 
    **🎯 Initial Implementation Path**
    - No MR exists yet, or MR exists but minimal implementation
@@ -508,11 +575,46 @@ Before starting any GitLab workflow, establish your current context:
 
 **CRITICAL**: Always use iterative development - implement one logical step, validate with pipeline, then proceed to next step.
 
-Begin by checking your current branch and MR status, then proceed with the appropriate workflow path based on your findings.`,
+Begin by checking your current branch and MR status, then proceed with the appropriate workflow path based on your findings.
+
+## 🎯 Execute This Workflow Now
+
+**Please perform this work-on-mr workflow immediately:**
+
+1. **Start the workflow** by discovering the project context and current MR status
+2. **Determine the appropriate path** (initial implementation, review response, or iterative development)
+3. **Execute the workflow systematically** following the process for your determined path
+4. **Implement changes iteratively** with proper testing and pipeline validation
+5. **Complete the process** by ensuring all criteria are met and work is ready
+
+**This is a request to perform the work-on-mr workflow - please begin now.**`,
 
   "code-review": `# Code Review Workflow
 
 This workflow guides you through conducting thorough, constructive code reviews on GitLab merge requests with emphasis on line-specific feedback and quality assurance.
+
+## 🔄 Context Compaction Detection & Recovery
+
+**CRITICAL**: If you notice your conversation context has been compacted/truncated and you've lost track of:
+- Which merge request you were reviewing
+- What files you've already reviewed
+- What feedback you've already provided
+- Your review progress and findings
+
+**IMMEDIATELY** use this tool to restore your workflow context:
+\`\`\`
+gitlab_get_prompt({"name": "code-review", "arguments": {"additional_instructions": "[your original instructions here]"}})
+\`\`\`
+
+Then review the full workflow content and determine where you left off based on:
+- The specific merge request you were reviewing
+- Existing discussion threads and comments you've made
+- Which files in the MR changes you've already examined
+- Any line-specific feedback already provided
+
+**Resume from the appropriate step** - do not restart the entire review unless necessary.
+
+---
 
 {{additional_instructions}}
 
@@ -564,15 +666,17 @@ Before starting any GitLab workflow, establish your current context:
 
 ## 📋 Systematic Review Process
 
-### 3. **Merge Request Analysis**
+### 3. **Merge Request Analysis** ✅📍 STEP 1
    - Use: \`gitlab_get_merge_request\` to understand the purpose and scope
    - Review MR description for completeness and clarity
    - Check if requirements and acceptance criteria are clearly addressed
    - Use: \`gitlab_get_merge_request_changes\` to get detailed file diffs
    - Use: \`gitlab_list_merge_request_discussions\` to review existing feedback
+   - **PROGRESS MARKER**: Mark this step complete when you understand the MR scope and have gathered all necessary information
 
-### 4. **File-by-File Review**
+### 4. **File-by-File Review** ✅📍 STEP 2
    For each changed file, conduct systematic analysis:
+   - **PROGRESS MARKER**: Mark this step complete when you have reviewed all changed files systematically
    
    **Read and Understand**
    - Use: \`Read\` tool to examine complete file contents
@@ -587,7 +691,8 @@ Before starting any GitLab workflow, establish your current context:
    - Verify appropriate (not excessive) error handling and resource management
    - Assess algorithm efficiency and logic correctness
 
-### 5. **Security & Performance Deep Dive**
+### 5. **Security & Performance Deep Dive** ✅📍 STEP 3
+   - **PROGRESS MARKER**: Mark this step complete when you have conducted thorough security and performance analysis
    **Security Review Focus:**
    - Input validation and sanitization
    - Output encoding to prevent XSS
@@ -604,17 +709,19 @@ Before starting any GitLab workflow, establish your current context:
    - Caching strategies
    - Resource cleanup practices
 
-### 6. **Testing & Quality Verification**
+### 6. **Testing & Quality Verification** ✅📍 STEP 4
    - Assess test coverage for new/changed code
    - Verify test quality and edge case handling
    - Check integration test adequacy
    - Evaluate error scenario testing
    - Review test maintainability and clarity
+   - **PROGRESS MARKER**: Mark this step complete when you have verified testing and quality standards
 
 ## 💬 Providing Constructive Feedback
 
-### 7. **Line-Specific Comments**
+### 7. **Line-Specific Comments** ✅📍 STEP 5
    For specific issues found, provide targeted feedback:
+   - **PROGRESS MARKER**: Mark this step complete when you have provided all necessary line-specific feedback
    
    **When to Use Line-Specific Comments:**
    - Code quality improvements needed
@@ -660,8 +767,9 @@ Before starting any GitLab workflow, establish your current context:
    **Impact**: Increased maintenance burden and cognitive load
    **Suggestion**: Consider a simpler, more direct approach that solves the core problem
 
-### 8. **Overall Assessment Summary**
+### 8. **Overall Assessment Summary** ✅📍 STEP 6
    Create comprehensive summary covering:
+   - **PROGRESS MARKER**: Mark this step complete when you have created your comprehensive review summary and made your final recommendation
    
    **Strengths**
    - Positive aspects of the implementation
@@ -687,6 +795,7 @@ Before starting any GitLab workflow, establish your current context:
    - **APPROVE**: Code meets quality standards, minor suggestions only
    - **REQUEST CHANGES**: Critical issues need addressing before merge
    - **NEEDS DISCUSSION**: Architectural concerns requiring team input
+   - **MERGE**: Code meets all criteria, valid suggestions are implemented and can be merged immediately
 
 ## 🎯 Review Decision Framework
 
@@ -710,6 +819,13 @@ Before starting any GitLab workflow, establish your current context:
 - Unclear requirements or specifications
 - Implementation approaches needing consensus
 - Solution complexity seems disproportionate to the problem being solved
+
+### Merge Criteria 🚀
+- All approval criteria met with no outstanding issues
+- CI/CD pipeline passes successfully
+- No blocking discussions or unresolved threads
+- Implementation is ready for production deployment
+- All review feedback has been addressed satisfactorily
 
 ## 🔍 Quality Assurance Checklist
 
@@ -776,6 +892,37 @@ Before starting any GitLab workflow, establish your current context:
 - Provide preliminary feedback quickly
 - Schedule follow-up for detailed review if needed
 
+## 🚀 Merge Execution Process
+
+### When to Merge
+If your review concludes that the implementation fully satisfies all criteria:
+- All approval criteria met with no outstanding issues
+- CI/CD pipeline passes successfully  
+- No blocking discussions or unresolved threads
+- Implementation is ready for production deployment
+- All review feedback has been addressed satisfactorily
+
+### Merge Process
+1. **Verify Pipeline Status**: Use \`gitlab_list_pipelines\` to confirm latest pipeline succeeded
+2. **Check for Blocking Discussions**: Ensure no unresolved critical feedback
+3. **Execute Merge**: Use \`gitlab_merge_merge_request\` with appropriate parameters:
+   - Set \`should_remove_source_branch: true\` if branch cleanup is desired
+   - Set \`squash: true\` if commit history should be condensed
+   - Include descriptive \`merge_commit_message\` summarizing the changes
+4. **Confirm Success**: Verify merge completed successfully
+5. **Post-Merge Communication**: Add final comment confirming merge and thanking contributors
+
+**Example Merge Call:**
+\`\`\`
+gitlab_merge_merge_request({
+  project_id: "project_id",
+  merge_request_iid: merge_request_iid,
+  should_remove_source_branch: true,
+  squash: true,
+  merge_commit_message: "feat: implement feature X with comprehensive tests and documentation"
+})
+\`\`\`
+
 ## Getting Started
 
 1. **Gather Context**: Understand the project and MR scope
@@ -783,6 +930,19 @@ Before starting any GitLab workflow, establish your current context:
 3. **Systematic Review**: Examine each file for quality, security, and performance
 4. **Provide Feedback**: Give specific, constructive line-specific comments
 5. **Summarize Assessment**: Create comprehensive summary with clear recommendation
+6. **Execute Action**: Based on assessment, either approve, request changes, or merge
 
-Begin by identifying the merge request to review, then proceed through each step systematically to ensure thorough, valuable feedback.`
+Begin by identifying the merge request to review, then proceed through each step systematically to ensure thorough, valuable feedback.
+
+## 🎯 Execute This Workflow Now
+
+**Please perform this code review workflow immediately:**
+
+1. **Start the workflow** by discovering the project context and identifying merge requests to review
+2. **Execute each step systematically** following the process outlined above
+3. **Provide comprehensive feedback** with line-specific comments where needed
+4. **Make a final decision** and execute the appropriate action (approve, request changes, discuss, or merge)
+5. **Complete the process** by taking the recommended action based on your assessment
+
+**This is a request to perform the code review workflow - please begin now.**`
 };
