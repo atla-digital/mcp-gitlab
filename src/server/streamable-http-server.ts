@@ -309,29 +309,28 @@ class GitLabStreamableHttpServer {
         // Get session data for GitLab API access
         const sessionData = await this.getSessionData(req);
         
-        // For initialization requests, allow without GitLab token
-        if (!sessionData && req.method === 'POST') {
-          const body = await this.readRequestBody(req);
-          const parsedBody = body ? JSON.parse(body) : undefined;
-          
-          if (!parsedBody || !parsedBody.method || 
-              (parsedBody.method !== 'initialize' && 
-               parsedBody.method !== 'tools/list' && 
-               parsedBody.method !== 'prompts/list')) {
-            res.writeHead(401, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ 
-              error: 'GitLab API token required',
-              message: 'Include X-GitLab-Token header'
-            }));
-            return;
-          }
+        // Read and parse the request body
+        const body = await this.readRequestBody(req);
+        const parsedBody = body ? JSON.parse(body) : undefined;
+        
+        // For non-initialization requests, require GitLab token
+        if (!sessionData && parsedBody && parsedBody.method && 
+            parsedBody.method !== 'initialize' && 
+            parsedBody.method !== 'tools/list' && 
+            parsedBody.method !== 'prompts/list') {
+          res.writeHead(401, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            error: 'GitLab API token required',
+            message: 'Include X-GitLab-Token header'
+          }));
+          return;
         }
 
         // Set current session data for handlers to use
         this.currentSessionData = sessionData;
 
-        // Handle the MCP request through the transport
-        await this.transport.handleRequest(req, res);
+        // Handle the MCP request through the transport with parsed body
+        await this.transport.handleRequest(req, res, parsedBody);
         
         // Clear current session data
         this.currentSessionData = null;
