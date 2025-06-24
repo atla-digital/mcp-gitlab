@@ -114,45 +114,68 @@ The server will be available at `http://localhost:3001/mcp`
 
 ### Configuration
 
-This server implements **Streamable HTTP** as the primary MCP transport. For clients that don't support Streamable HTTP natively (like Claude Code), use `mcp-remote` as a proxy.
+This server implements **Streamable HTTP** as the primary MCP transport, which is now natively supported by Claude Code.
 
-#### For Claude Code/Desktop
-Add the following to your MCP settings file (`~/.claude.json`):
+#### For Claude Code/Desktop (Recommended)
+
+The easiest way to add the GitLab MCP server is using the Claude CLI:
+
+```bash
+# For GitLab.com
+claude mcp add sm-gitlab http://host.docker.internal:3001/mcp \
+  --transport http \
+  --scope user \
+  -H "X-GitLab-Token: YOUR_GITLAB_API_TOKEN" \
+  -H "X-GitLab-URL: https://gitlab.com"
+
+# For self-hosted GitLab
+claude mcp add sm-gitlab http://host.docker.internal:3001/mcp \
+  --transport http \
+  --scope user \
+  -H "X-GitLab-Token: YOUR_GITLAB_API_TOKEN" \
+  -H "X-GitLab-URL: https://your-gitlab-instance.com"
+```
+
+#### Manual Configuration (Alternative)
+
+Alternatively, you can manually add the following to your MCP settings file (`~/.claude.json`):
 
 ```json
 {
   "mcpServers": {
     "sm-gitlab": {
-      "command": "npx",
-      "args": [
-        "mcp-remote@latest",
-        "http://host.docker.internal:3001/mcp",
-        "--allow-http",
-        "--header",
-        "X-GitLab-Token: ${GITLAB_TOKEN}",
-        "--header",
-        "X-GitLab-URL: ${GITLAB_URL}"
-      ],
-      "env": {
-        "GITLAB_TOKEN": "YOUR_GITLAB_API_TOKEN",
-        "GITLAB_URL": "https://your-gitlab-instance.com/api/v4"
+      "type": "http",
+      "url": "http://host.docker.internal:3001/mcp",
+      "headers": {
+        "X-GitLab-Token": "YOUR_GITLAB_API_TOKEN",
+        "X-GitLab-URL": "https://your-gitlab-instance.com"
       }
     }
   }
 }
 ```
 
-#### For Streamable HTTP Compatible Clients
-Direct connection to the server:
-```
-http://localhost:3001/mcp
-```
+#### Configuration Details
 
-Pass GitLab credentials as HTTP headers:
-- `X-GitLab-Token`: Your GitLab API token
-- `X-GitLab-URL`: Your GitLab API base URL (defaults to https://gitlab.com/api/v4)
+- **`X-GitLab-Token`**: Your GitLab API token (required)
+- **`X-GitLab-URL`**: Your GitLab instance URL (optional, defaults to `https://gitlab.com`)
 
-Replace `YOUR_GITLAB_API_TOKEN` with your actual GitLab API token. You can generate a token in your GitLab account under Settings > Access Tokens.
+**Important Notes:**
+- The server automatically appends `/api/v4` to the GitLab URL if not present
+- Only GitLab API v4 is supported
+- You can generate a token in your GitLab account under Settings > Access Tokens
+
+**Example GitLab URLs:**
+```bash
+# For GitLab.com
+-H "X-GitLab-URL: https://gitlab.com"
+
+# For self-hosted GitLab
+-H "X-GitLab-URL: https://your-gitlab-instance.com"
+
+# Already includes /api/v4 (also works)
+-H "X-GitLab-URL: https://gitlab.com/api/v4"
+```
 
 ### Updating to Latest Version
 

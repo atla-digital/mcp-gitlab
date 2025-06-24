@@ -76,9 +76,39 @@ class GitLabStreamableHttpServer {
    */
   private async getSessionData(req: IncomingMessage): Promise<SessionData | null> {
     const gitlabApiToken = req.headers['x-gitlab-token'] as string;
-    const gitlabApiUrl = (req.headers['x-gitlab-url'] as string) || 'https://gitlab.com/api/v4';
+    let gitlabApiUrl = (req.headers['x-gitlab-url'] as string) || 'https://gitlab.com/api/v4';
     
     if (!gitlabApiToken) {
+      return null;
+    }
+
+    // Validate and normalize GitLab API URL
+    try {
+      const url = new URL(gitlabApiUrl);
+      const path = url.pathname;
+      
+      // Check if it already has an API version
+      if (path.includes('/api/')) {
+        // Extract API version if present
+        const apiMatch = path.match(/\/api\/v(\d+)/);
+        if (apiMatch) {
+          const version = apiMatch[1];
+          if (version !== '4') {
+            console.error(`Unsupported GitLab API version: v${version}. Only v4 is supported.`);
+            return null;
+          }
+        } else {
+          // Has /api/ but no version - invalid
+          console.error(`Invalid GitLab API URL: ${gitlabApiUrl}. Expected format: https://domain.com/api/v4`);
+          return null;
+        }
+      } else {
+        // No /api/ path, append /api/v4
+        gitlabApiUrl = url.origin + '/api/v4';
+        console.log(`Auto-appending /api/v4 to GitLab URL: ${gitlabApiUrl}`);
+      }
+    } catch (error) {
+      console.error(`Invalid GitLab API URL: ${gitlabApiUrl}`, error);
       return null;
     }
 
@@ -97,6 +127,39 @@ class GitLabStreamableHttpServer {
         baseURL: gitlabApiUrl,
         headers: { 'PRIVATE-TOKEN': gitlabApiToken }
       });
+
+      // Add request/response logging
+      axiosInstance.interceptors.request.use(
+        (config) => {
+          const maskedToken = gitlabApiToken.substring(0, 8) + '...';
+          console.log(`GitLab API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+          console.log(`Headers: PRIVATE-TOKEN: ${maskedToken}`);
+          if (config.data) {
+            console.log(`Body: ${JSON.stringify(config.data).substring(0, 200)}...`);
+          }
+          return config;
+        },
+        (error) => {
+          console.error('GitLab API Request Error:', error.message);
+          return Promise.reject(error);
+        }
+      );
+
+      axiosInstance.interceptors.response.use(
+        (response) => {
+          console.log(`GitLab API Response: ${response.status} ${response.statusText}`);
+          return response;
+        },
+        (error) => {
+          if (error.response) {
+            console.error(`GitLab API Error: ${error.response.status} ${error.response.statusText}`);
+            console.error(`Response: ${JSON.stringify(error.response.data).substring(0, 200)}...`);
+          } else {
+            console.error('GitLab API Network Error:', error.message);
+          }
+          return Promise.reject(error);
+        }
+      );
 
       // Test GitLab connection
       await axiosInstance.get('/user');
