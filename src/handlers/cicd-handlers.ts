@@ -57,7 +57,7 @@ export const getPipelineJobs: ToolHandler = async (params, context) => {
  * Get job log handler
  */
 export const getJobLog: ToolHandler = async (params, context) => {
-  const { project_id, job_id } = params.arguments || {};
+  const { project_id, job_id, tail } = params.arguments || {};
   if (!project_id || !job_id) {
     throw new McpError(ErrorCode.InvalidParams, 'project_id and job_id are required');
   }
@@ -66,7 +66,17 @@ export const getJobLog: ToolHandler = async (params, context) => {
     `/projects/${encodeURIComponent(String(project_id))}/jobs/${job_id}/trace`,
     { headers: { 'Accept': 'text/plain' } }
   );
-  return formatResponse({ log: response.data });
+  
+  let logData = response.data;
+  if (tail) {
+    const tailNumber = typeof tail === 'string' ? parseInt(tail, 10) : Number(tail);
+    if (!isNaN(tailNumber) && tailNumber > 0) {
+      const lines = logData.split('\n');
+      logData = lines.slice(-tailNumber).join('\n');
+    }
+  }
+  
+  return formatResponse({ log: logData });
 };
 
 /**

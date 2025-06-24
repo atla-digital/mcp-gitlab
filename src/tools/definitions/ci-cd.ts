@@ -84,6 +84,10 @@ export const cicdToolDefinitions = [
         job_id: {
           type: 'number',
           description: 'The ID of the job'
+        },
+        tail: {
+          type: 'number',
+          description: 'Only show the last N lines of the log. If not specified, the entire log is returned.'
         }
       },
       required: ['project_id', 'job_id']
