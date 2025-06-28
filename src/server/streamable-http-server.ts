@@ -426,7 +426,7 @@ class GitLabStreamableHttpServer {
 
   private cleanupInactiveSessions(): void {
     const now = new Date();
-    const maxAge = 30 * 60 * 1000; // 30 minutes
+    const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
 
     for (const [sessionKey, session] of this.sessions) {
       if (now.getTime() - session.lastUsed.getTime() > maxAge) {
