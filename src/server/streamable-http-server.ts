@@ -183,6 +183,9 @@ class GitLabStreamableHttpServer {
       };
 
       this.sessions.set(sessionKey, sessionData);
+      console.log(`Created new session: ${gitlabApiToken.substring(0, 8)}... for ${gitlabApiUrl}`);
+      const stats = this.getSessionStats();
+      console.log(`Total active sessions: ${stats.totalSessions}`);
       return sessionData;
     } catch (error: any) {
       console.error('GitLab authentication failed:', error.response?.data || error.message);
@@ -317,6 +320,37 @@ class GitLabStreamableHttpServer {
         return;
       }
 
+      // Session heartbeat endpoint
+      if (req.url === '/heartbeat' && req.method === 'POST') {
+        try {
+          const sessionData = await this.getSessionData(req);
+          if (sessionData) {
+            sessionData.lastUsed = new Date();
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+              status: 'ok', 
+              sessionActive: true,
+              timestamp: new Date().toISOString() 
+            }));
+          } else {
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+              status: 'error',
+              sessionActive: false,
+              message: 'Session not found' 
+            }));
+          }
+        } catch (error: any) {
+          res.writeHead(401, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            status: 'error',
+            sessionActive: false,
+            message: error.message || 'Authentication failed' 
+          }));
+        }
+        return;
+      }
+
       // MCP endpoint
       if (req.url === '/mcp') {
         // Read and parse the request body first
@@ -427,22 +461,56 @@ class GitLabStreamableHttpServer {
   private cleanupInactiveSessions(): void {
     const now = new Date();
     const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+    const sessionCount = this.sessions.size;
+    let cleanedCount = 0;
 
     for (const [sessionKey, session] of this.sessions) {
       if (now.getTime() - session.lastUsed.getTime() > maxAge) {
-        console.log(`Cleaning up inactive session: ${sessionKey.split(':')[0].substring(0, 8)}...`);
+        const sessionAge = Math.floor((now.getTime() - session.lastUsed.getTime()) / (1000 * 60 * 60 * 24));
+        console.log(`Cleaning up inactive session: ${sessionKey.split(':')[0].substring(0, 8)}... (inactive for ${sessionAge} days)`);
         this.sessions.delete(sessionKey);
+        cleanedCount++;
       }
     }
+
+    if (cleanedCount > 0) {
+      console.log(`Session cleanup completed: removed ${cleanedCount} sessions, ${sessionCount - cleanedCount} sessions remaining`);
+    }
+  }
+
+  private getSessionStats(): { totalSessions: number, oldestSession: string | null } {
+    if (this.sessions.size === 0) {
+      return { totalSessions: 0, oldestSession: null };
+    }
+
+    let oldestTime = new Date();
+    let oldestSessionKey = '';
+
+    for (const [sessionKey, session] of this.sessions) {
+      if (session.lastUsed < oldestTime) {
+        oldestTime = session.lastUsed;
+        oldestSessionKey = sessionKey.split(':')[0].substring(0, 8) + '...';
+      }
+    }
+
+    const ageInHours = Math.floor((new Date().getTime() - oldestTime.getTime()) / (1000 * 60 * 60));
+    return { 
+      totalSessions: this.sessions.size, 
+      oldestSession: `${oldestSessionKey} (${ageInHours}h ago)` 
+    };
   }
 
   async start(): Promise<void> {
     // Connect server to transport (transport starts automatically)
     await this.server.connect(this.transport);
 
-    // Set up cleanup interval
+    // Set up cleanup and monitoring intervals
     this.cleanupInterval = setInterval(() => {
       this.cleanupInactiveSessions();
+      const stats = this.getSessionStats();
+      if (stats.totalSessions > 0) {
+        console.log(`Active sessions: ${stats.totalSessions}, oldest: ${stats.oldestSession}`);
+      }
     }, 5 * 60 * 1000); // Check every 5 minutes
 
     // Start HTTP server
@@ -453,6 +521,7 @@ class GitLabStreamableHttpServer {
       this.httpServer!.listen(this.port, () => {
         console.log(`GitLab MCP Streamable HTTP server running on port ${this.port}`);
         console.log(`Health endpoint: http://localhost:${this.port}/health`);
+        console.log(`Heartbeat endpoint: http://localhost:${this.port}/heartbeat`);
         console.log(`MCP endpoint: http://localhost:${this.port}/mcp`);
         resolve();
       });
