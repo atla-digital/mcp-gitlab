@@ -24,6 +24,52 @@ export const issueToolDefinitions = [
         }
       },
       required: ['project_id']
+    },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        issues: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'number' },
+              title: { type: 'string' },
+              description: { type: 'string' },
+              state: { type: 'string' },
+              web_url: { type: 'string' },
+              author: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  username: { type: 'string' }
+                }
+              },
+              assignees: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' },
+                    username: { type: 'string' }
+                  }
+                }
+              },
+              labels: {
+                type: 'array',
+                items: { type: 'string' }
+              },
+              created_at: { type: 'string' },
+              updated_at: { type: 'string' }
+            }
+          }
+        }
+      }
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -59,6 +105,35 @@ export const issueToolDefinitions = [
         }
       },
       required: ['project_id', 'title']
+    },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        issue: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            title: { type: 'string' },
+            description: { type: 'string' },
+            state: { type: 'string' },
+            web_url: { type: 'string' },
+            author: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                username: { type: 'string' }
+              }
+            },
+            created_at: { type: 'string' },
+            updated_at: { type: 'string' }
+          }
+        }
+      }
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false
     }
   },
   {

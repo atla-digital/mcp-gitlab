@@ -10,8 +10,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run watch` - Watch TypeScript files for changes and recompile
 - `npm run inspector` - Start MCP inspector for debugging server
 
-### Git Hooks
-- `npm run install-hooks` - Install pre-commit hook that auto-generates TOOLS.md
+### CI/CD & Documentation
+```bash
+# Install git hooks for automatic documentation generation
+npm run install-hooks
+
+# Generate tool documentation manually
+npm run generate-docs
+```
 
 ## Architecture Overview
 
@@ -348,6 +354,57 @@ curl http://localhost:3001/health
 3. Test health endpoint first: `curl http://localhost:3001/health`
 4. Verify GitLab credentials work: Test with simple GitLab API call
 
+## CI/CD Pipeline
+
+### GitHub Actions Workflows
+
+The project includes automated CI/CD pipelines using GitHub Actions:
+
+#### Docker Build & Publish (`.github/workflows/docker-publish.yml`)
+- **Triggers**: Push to `main` branch, release publication
+- **Features**:
+  - Multi-platform builds (linux/amd64, linux/arm64)
+  - Publishes to GitHub Container Registry (ghcr.io)
+  - Build caching for performance
+  - Artifact attestations for security
+  - Automatic tagging (branch, PR, semver, latest)
+
+#### CI Pipeline (`.github/workflows/ci.yml`)
+- **Triggers**: Push to `main`/`develop`, pull requests
+- **Features**:
+  - Multi-version Node.js testing (20, 22)
+  - TypeScript compilation and type checking
+  - Build validation
+  - HTTP server startup testing
+  - Docker container testing with distroless-compatible health checks
+  - TOOLS.md documentation validation
+
+### Git Hooks & Documentation
+
+#### Pre-commit Hook (`git-hooks/pre-commit`)
+- Automatically regenerates `TOOLS.md` when tool definitions change
+- Monitors changes to `src/tools/definitions/` and `src/utils/tools-data.ts`
+- Runs build process to ensure latest compiled definitions
+- Adds updated documentation to the commit
+
+#### Documentation Generation (`scripts/generate-tools-md.js`)
+- Generates comprehensive tool documentation from TypeScript definitions
+- Categorizes tools by function (Repository, Integrations, CI/CD, User Management)
+- Creates formatted markdown with parameter tables and default values
+- Maintains table of contents with GitHub-compatible anchors
+
+### Setup Commands
+```bash
+# Install git hooks for automatic documentation
+npm run install-hooks
+
+# Generate documentation manually
+npm run generate-docs
+
+# Complete build and documentation workflow
+npm run build && npm run generate-docs
+```
+
 ## Important Development Notes
 
 - Tool definitions in `tools-data.ts` automatically generate TOOLS.md via pre-commit hook
@@ -356,3 +413,4 @@ curl http://localhost:3001/health
 - The server binary is built to `build/index.js` and made executable during build
 - Always use `docker compose up --build` when deploying to ensure latest code is included
 - Tool registry maps tool names to handler functions for clean separation of concerns
+- Use GitHub Actions for CI/CD automation with comprehensive testing and validation

@@ -4,7 +4,7 @@
 
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 import { ToolHandler } from "../../../utils/handler-types.js";
-import { formatResponse } from "../../../utils/response-formatter.js";
+import { formatProjectsResponse, formatProjectResponse, formatResponse } from "../../../utils/response-formatter.js";
 
 /**
  * List projects handler
@@ -20,7 +20,7 @@ export const listProjects: ToolHandler = async (params, context) => {
     }
   });
   
-  return formatResponse(response.data);
+  return formatProjectsResponse(response.data);
 };
 
 /**
@@ -33,7 +33,7 @@ export const getProject: ToolHandler = async (params, context) => {
   }
   
   const response = await context.axiosInstance.get(`/projects/${encodeURIComponent(String(project_id))}`);
-  return formatResponse(response.data);
+  return formatProjectResponse(response.data);
 };
 
 /**

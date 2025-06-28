@@ -62,8 +62,10 @@ class GitLabStreamableHttpServer {
           canListPrompts: true,
           canGetPrompts: true,
           tools: { listChanged: false },
-          resources: { listChanged: false },
-          prompts: { listChanged: false }
+          resources: { listChanged: false, subscribe: false },
+          prompts: { listChanged: false },
+          completions: {},
+          experimental: {}
         }
       }
     );

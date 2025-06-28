@@ -55,7 +55,8 @@ async function generateToolsMarkdown() {
           name: paramName,
           type: paramDef.type,
           description: paramDef.description || '',
-          required: required.includes(paramName)
+          required: required.includes(paramName),
+          default: paramDef.default
         });
       }
     }
@@ -111,11 +112,12 @@ async function generateToolsMarkdown() {
       
       if (tool.parameters.length > 0) {
         markdown += '**Parameters:**\n\n';
-        markdown += '| Name | Type | Required | Description |\n';
-        markdown += '| ---- | ---- | -------- | ----------- |\n';
+        markdown += '| Name | Type | Required | Description | Default |\n';
+        markdown += '| ---- | ---- | -------- | ----------- | ------- |\n';
         
         tool.parameters.forEach(param => {
-          markdown += `| \`${param.name}\` | \`${param.type}\` | ${param.required ? 'Yes' : 'No'} | ${param.description} |\n`;
+          const defaultValue = param.default !== undefined ? `\`${param.default}\`` : '-';
+          markdown += `| \`${param.name}\` | \`${param.type}\` | ${param.required ? 'Yes' : 'No'} | ${param.description} | ${defaultValue} |\n`;
         });
         
         markdown += '\n';

@@ -67,9 +67,11 @@ class GitLabServer {
           canReadResources: true,
           canListPrompts: true,
           canGetPrompts: true,
-          tools: { listChanged: false }, // Enable tools capability with proper structure
-          resources: { listChanged: false }, // Enable resources capability with proper structure
-          prompts: { listChanged: false } // Enable prompts capability
+          tools: { listChanged: false },
+          resources: { listChanged: false, subscribe: false },
+          prompts: { listChanged: false },
+          completions: {},
+          experimental: {}
         }
       }
     );

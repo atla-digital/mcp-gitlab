@@ -26,6 +26,34 @@ export const repositoryToolDefinitions = [
           description: 'Number of projects to return per page (max 100)'
         }
       }
+    },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        projects: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'number' },
+              name: { type: 'string' },
+              path: { type: 'string' },
+              name_with_namespace: { type: 'string' },
+              description: { type: 'string' },
+              visibility: { type: 'string' },
+              default_branch: { type: 'string' },
+              web_url: { type: 'string' },
+              created_at: { type: 'string' },
+              last_activity_at: { type: 'string' }
+            }
+          }
+        }
+      }
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -40,6 +68,35 @@ export const repositoryToolDefinitions = [
         }
       },
       required: ['project_id']
+    },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        project: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            name: { type: 'string' },
+            path: { type: 'string' },
+            name_with_namespace: { type: 'string' },
+            description: { type: 'string' },
+            visibility: { type: 'string' },
+            default_branch: { type: 'string' },
+            web_url: { type: 'string' },
+            ssh_url_to_repo: { type: 'string' },
+            http_url_to_repo: { type: 'string' },
+            created_at: { type: 'string' },
+            last_activity_at: { type: 'string' },
+            star_count: { type: 'number' },
+            forks_count: { type: 'number' }
+          }
+        }
+      }
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -58,6 +115,43 @@ export const repositoryToolDefinitions = [
         }
       },
       required: ['project_id']
+    },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        branches: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              commit: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  short_id: { type: 'string' },
+                  title: { type: 'string' },
+                  message: { type: 'string' },
+                  author_name: { type: 'string' },
+                  author_email: { type: 'string' },
+                  authored_date: { type: 'string' },
+                  committer_name: { type: 'string' },
+                  committer_email: { type: 'string' },
+                  committed_date: { type: 'string' }
+                }
+              },
+              merged: { type: 'boolean' },
+              protected: { type: 'boolean' },
+              default: { type: 'boolean' }
+            }
+          }
+        }
+      }
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {

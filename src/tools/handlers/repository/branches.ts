@@ -4,7 +4,7 @@
 
 import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
 import { ToolHandler } from "../../../utils/handler-types.js";
-import { formatResponse } from "../../../utils/response-formatter.js";
+import { formatBranchesResponse, formatResponse } from "../../../utils/response-formatter.js";
 
 /**
  * List branches handler
@@ -19,7 +19,7 @@ export const listBranches: ToolHandler = async (params, context) => {
     `/projects/${encodeURIComponent(String(project_id))}/repository/branches`,
     { params: { search } }
   );
-  return formatResponse(response.data);
+  return formatBranchesResponse(response.data);
 };
 
 /**
