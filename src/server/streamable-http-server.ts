@@ -186,7 +186,20 @@ class GitLabStreamableHttpServer {
       return sessionData;
     } catch (error: any) {
       console.error('GitLab authentication failed:', error.response?.data || error.message);
-      return null;
+      
+      // Check for specific token expiration error
+      if (error.response?.data?.error === 'invalid_token' && 
+          error.response?.data?.error_description?.includes('expired')) {
+        throw new Error('GITLAB_TOKEN_EXPIRED: Your GitLab API token has expired. Please generate a new token and update your configuration.');
+      }
+      
+      // Check for other authentication errors
+      if (error.response?.status === 401) {
+        throw new Error('GITLAB_TOKEN_INVALID: Invalid GitLab API token. Please check your token and GitLab URL configuration.');
+      }
+      
+      // Generic error for other cases
+      throw new Error(`GITLAB_CONNECTION_FAILED: Unable to connect to GitLab API: ${error.message}`);
     }
   }
 
@@ -306,12 +319,57 @@ class GitLabStreamableHttpServer {
 
       // MCP endpoint
       if (req.url === '/mcp') {
-        // Get session data for GitLab API access
-        const sessionData = await this.getSessionData(req);
-        
-        // Read and parse the request body
+        // Read and parse the request body first
         const body = await this.readRequestBody(req);
         const parsedBody = body ? JSON.parse(body) : undefined;
+        
+        // Try to get session data for GitLab API access
+        let sessionData = null;
+        try {
+          sessionData = await this.getSessionData(req);
+        } catch (error: any) {
+          // Handle GitLab authentication errors with clear messages
+          const errorMessage = error.message || 'Unknown error';
+          
+          if (errorMessage.startsWith('GITLAB_TOKEN_EXPIRED:')) {
+            res.writeHead(401, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+              error: 'gitlab_token_expired',
+              message: 'Your GitLab API token has expired. Please generate a new token and update your configuration.',
+              details: errorMessage
+            }));
+            return;
+          }
+          
+          if (errorMessage.startsWith('GITLAB_TOKEN_INVALID:')) {
+            res.writeHead(401, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+              error: 'gitlab_token_invalid',
+              message: 'Invalid GitLab API token. Please check your token and GitLab URL configuration.',
+              details: errorMessage
+            }));
+            return;
+          }
+          
+          if (errorMessage.startsWith('GITLAB_CONNECTION_FAILED:')) {
+            res.writeHead(502, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ 
+              error: 'gitlab_connection_failed',
+              message: 'Unable to connect to GitLab API. Please check your GitLab URL and network connectivity.',
+              details: errorMessage
+            }));
+            return;
+          }
+          
+          // Generic error
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            error: 'session_creation_failed',
+            message: 'Failed to create GitLab session.',
+            details: errorMessage
+          }));
+          return;
+        }
         
         // For non-initialization requests, require GitLab token
         if (!sessionData && parsedBody && parsedBody.method && 
@@ -320,8 +378,8 @@ class GitLabStreamableHttpServer {
             parsedBody.method !== 'prompts/list') {
           res.writeHead(401, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ 
-            error: 'GitLab API token required',
-            message: 'Include X-GitLab-Token header'
+            error: 'gitlab_token_required',
+            message: 'GitLab API token required. Include X-GitLab-Token header with a valid token.'
           }));
           return;
         }
