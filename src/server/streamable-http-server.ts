@@ -41,10 +41,10 @@ class GitLabStreamableHttpServer {
   constructor(port: number = 3000) {
     this.port = port;
     
-    // Create single transport instance with stateless mode (no session validation)
+    // Create single transport instance with JSON response support and session management
     this.transport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: undefined, // Disable session management
-      enableJsonResponse: false
+      sessionIdGenerator: () => randomUUID(), // Enable session management
+      enableJsonResponse: true
     });
 
     // Create single server instance
