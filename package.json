@@ -5,20 +5,18 @@
   "private": true,
   "type": "module",
   "bin": {
-    "mcp-gitlab": "./build/index.js"
+    "mcp-gitlab": "./build/server/streamable-http-server.js"
   },
   "files": [
     "build"
   ],
   "scripts": {
-    "build": "tsc && node -e \"import('fs').then(fs => fs.chmodSync('build/index.js', '755'))\"",
+    "build": "tsc && node -e \"import('fs').then(fs => fs.chmodSync('build/server/streamable-http-server.js', '755'))\"",
     "prepare": "npm run build",
     "watch": "tsc --watch",
-    "start": "node build/streamable-http-server.js",
-    "start:mcp": "node build/index.js",
-    "start:http": "node build/streamable-http-server.js",
-    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
-    "inspector:http": "npx @modelcontextprotocol/inspector streamableHttp \"http://localhost:3000/mcp\"",
+    "start": "node build/server/streamable-http-server.js",
+    "start:http": "node build/server/streamable-http-server.js",
+    "inspector:http": "npx @modelcontextprotocol/inspector streamableHttp \"http://localhost:3001/mcp\"",
     "install-hooks": "cp -f git-hooks/pre-commit .git/hooks/ && chmod +x .git/hooks/pre-commit",
     "generate-docs": "node scripts/generate-tools-md.js"
   },

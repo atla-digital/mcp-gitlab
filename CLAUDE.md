@@ -32,9 +32,9 @@ The server implements the Streamable HTTP MCP transport protocol, running as an 
 
 ### Core Architecture
 
-**Main Entry Point**: `src/index.ts`
-- Initializes GitLabServer class with MCP capabilities
-- Creates axios instance with GitLab API authentication
+**Main Entry Point**: `src/server/streamable-http-server.ts`
+- Implements GitLabStreamableHttpServer class with HTTP transport
+- Creates axios instances with GitLab API authentication per session
 - Sets up request handlers for tools, resources, and capabilities
 
 **Tool Organization**: The codebase is organized into four main functional domains:
