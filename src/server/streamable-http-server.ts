@@ -127,7 +127,8 @@ class GitLabStreamableHttpServer {
     try {
       const axiosInstance = axios.create({
         baseURL: gitlabApiUrl,
-        headers: { 'PRIVATE-TOKEN': gitlabApiToken }
+        headers: { 'PRIVATE-TOKEN': gitlabApiToken },
+        timeout: 30000 // 30 seconds timeout to prevent hanging connections
       });
 
       // Add request/response logging
