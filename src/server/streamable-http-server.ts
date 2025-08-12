@@ -26,6 +26,7 @@ import { handleListResources, handleReadResource } from '../utils/resource-handl
 import { handleApiError } from '../utils/response-formatter.js';
 import type { HandlerContext } from '../utils/handler-types.js';
 import { apiLogger, sessionLogger, serverLogger, authLogger } from '../utils/logger.js';
+import { config } from '../utils/config.js';
 
 interface SessionData {
   gitlabApiToken: string;
@@ -43,7 +44,7 @@ class GitLabStreamableHttpServer {
   private port: number;
   private currentSessionData: SessionData | null = null;
 
-  constructor(port: number = 3000) {
+  constructor(port: number = config.port) {
     this.port = port;
 
     // Create single transport instance with JSON response support and session management
@@ -139,21 +140,25 @@ class GitLabStreamableHttpServer {
       const axiosInstance = axios.create({
         baseURL: gitlabApiUrl,
         headers: { 'PRIVATE-TOKEN': gitlabApiToken },
-        timeout: 30000, // 30 seconds timeout to prevent hanging connections
+        timeout: config.axiosTimeout,
       });
 
       // Add request/response logging
       axiosInstance.interceptors.request.use(
-        config => {
+        axiosConfig => {
           const maskedToken = gitlabApiToken.substring(0, 8) + '...';
-          apiLogger.http('GitLab API Request', {
-            method: config.method?.toUpperCase(),
-            url: `${config.baseURL}${config.url}`,
-            token: maskedToken,
-            hasBody: !!config.data,
-            bodyPreview: config.data ? JSON.stringify(config.data).substring(0, 100) : undefined,
-          });
-          return config;
+          if (config.enableRequestLogging) {
+            apiLogger.http('GitLab API Request', {
+              method: axiosConfig.method?.toUpperCase(),
+              url: `${axiosConfig.baseURL}${axiosConfig.url}`,
+              token: maskedToken,
+              hasBody: !!axiosConfig.data,
+              bodyPreview: axiosConfig.data
+                ? JSON.stringify(axiosConfig.data).substring(0, 100)
+                : undefined,
+            });
+          }
+          return axiosConfig;
         },
         error => {
           apiLogger.error('GitLab API Request Error', { error: error.message });
@@ -163,11 +168,13 @@ class GitLabStreamableHttpServer {
 
       axiosInstance.interceptors.response.use(
         response => {
-          apiLogger.http('GitLab API Response', {
-            status: response.status,
-            statusText: response.statusText,
-            url: response.config.url,
-          });
+          if (config.enableRequestLogging) {
+            apiLogger.http('GitLab API Response', {
+              status: response.status,
+              statusText: response.statusText,
+              url: response.config.url,
+            });
+          }
           return response;
         },
         error => {
@@ -530,7 +537,7 @@ class GitLabStreamableHttpServer {
 
   private cleanupInactiveSessions(): void {
     const now = new Date();
-    const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+    const maxAge = config.sessionMaxAge;
     const sessionCount = this.sessions.size;
     let cleanedCount = 0;
 
@@ -588,19 +595,16 @@ class GitLabStreamableHttpServer {
     await this.server.connect(this.transport);
 
     // Set up cleanup and monitoring intervals
-    this.cleanupInterval = setInterval(
-      () => {
-        this.cleanupInactiveSessions();
-        const stats = this.getSessionStats();
-        if (stats.totalSessions > 0) {
-          sessionLogger.debug('Active sessions status', {
-            totalSessions: stats.totalSessions,
-            oldestSession: stats.oldestSession,
-          });
-        }
-      },
-      5 * 60 * 1000
-    ); // Check every 5 minutes
+    this.cleanupInterval = setInterval(() => {
+      this.cleanupInactiveSessions();
+      const stats = this.getSessionStats();
+      if (stats.totalSessions > 0) {
+        sessionLogger.debug('Active sessions status', {
+          totalSessions: stats.totalSessions,
+          oldestSession: stats.oldestSession,
+        });
+      }
+    }, config.sessionCleanupInterval);
 
     // Start HTTP server
     const { createServer } = await import('http');
@@ -651,7 +655,7 @@ class GitLabStreamableHttpServer {
 
 // Start server if this file is run directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const server = new GitLabStreamableHttpServer(parseInt(process.env.PORT || '3000'));
+  const server = new GitLabStreamableHttpServer();
 
   // Handle graceful shutdown
   process.on('SIGINT', async () => {
