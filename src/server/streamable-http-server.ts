@@ -221,7 +221,7 @@ class GitLabStreamableHttpServer {
     });
 
     // List available resources
-    this.server.setRequestHandler(ListResourcesRequestSchema, async (request) => {
+    this.server.setRequestHandler(ListResourcesRequestSchema, async () => {
       if (!this.currentSessionData) {
         throw new McpError(ErrorCode.InvalidRequest, 'No active session');
       }
@@ -450,11 +450,12 @@ class GitLabStreamableHttpServer {
 
   private async readRequestBody(req: IncomingMessage): Promise<string> {
     return new Promise((resolve, reject) => {
-      let body = '';
-      req.on('data', (chunk) => {
-        body += chunk.toString();
+      const chunks: Buffer[] = [];
+      req.on('data', (chunk: Buffer) => {
+        chunks.push(chunk);
       });
       req.on('end', () => {
+        const body = Buffer.concat(chunks).toString('utf8');
         resolve(body);
       });
       req.on('error', reject);
@@ -467,9 +468,14 @@ class GitLabStreamableHttpServer {
     const sessionCount = this.sessions.size;
     let cleanedCount = 0;
 
-    for (const [sessionKey, session] of this.sessions) {
-      if (now.getTime() - session.lastUsed.getTime() > maxAge) {
-        const sessionAge = Math.floor((now.getTime() - session.lastUsed.getTime()) / (1000 * 60 * 60 * 24));
+    // Take snapshot of sessions to avoid race condition with concurrent access
+    const sessionsSnapshot = Array.from(this.sessions.entries());
+    
+    for (const [sessionKey, session] of sessionsSnapshot) {
+      // Re-check if session still exists and is still old (avoid race condition)
+      const currentSession = this.sessions.get(sessionKey);
+      if (currentSession && now.getTime() - currentSession.lastUsed.getTime() > maxAge) {
+        const sessionAge = Math.floor((now.getTime() - currentSession.lastUsed.getTime()) / (1000 * 60 * 60 * 24));
         console.log(`Cleaning up inactive session: ${sessionKey.split(':')[0].substring(0, 8)}... (inactive for ${sessionAge} days)`);
         this.sessions.delete(sessionKey);
         cleanedCount++;
@@ -529,7 +535,16 @@ class GitLabStreamableHttpServer {
         resolve();
       });
 
-      this.httpServer!.on('error', reject);
+      this.httpServer!.on('error', (error: any) => {
+        console.error('HTTP server error:', error);
+        if (this.httpServer!.listening) {
+          // Runtime error - log but don't crash
+          console.error('HTTP server runtime error - server may be unstable');
+        } else {
+          // Startup error - reject promise
+          reject(error);
+        }
+      });
     });
   }
 
