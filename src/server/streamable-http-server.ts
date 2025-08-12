@@ -25,6 +25,7 @@ import { promptDefinitions, promptTemplates } from '../utils/prompts-data.js';
 import { handleListResources, handleReadResource } from '../utils/resource-handlers.js';
 import { handleApiError } from '../utils/response-formatter.js';
 import type { HandlerContext } from '../utils/handler-types.js';
+import { apiLogger, sessionLogger, serverLogger, authLogger } from '../utils/logger.js';
 
 interface SessionData {
   gitlabApiToken: string;
@@ -100,23 +101,27 @@ class GitLabStreamableHttpServer {
         if (apiMatch) {
           const version = apiMatch[1];
           if (version !== '4') {
-            console.error(`Unsupported GitLab API version: v${version}. Only v4 is supported.`);
+            authLogger.error('Unsupported GitLab API version', { version, supported: 'v4' });
             return null;
           }
         } else {
           // Has /api/ but no version - invalid
-          console.error(
-            `Invalid GitLab API URL: ${gitlabApiUrl}. Expected format: https://domain.com/api/v4`
-          );
+          authLogger.error('Invalid GitLab API URL format', {
+            url: gitlabApiUrl,
+            expected: 'https://domain.com/api/v4',
+          });
           return null;
         }
       } else {
         // No /api/ path, append /api/v4
         gitlabApiUrl = url.origin + '/api/v4';
-        console.log(`Auto-appending /api/v4 to GitLab URL: ${gitlabApiUrl}`);
+        authLogger.info('Auto-appending /api/v4 to GitLab URL', {
+          originalUrl: url.origin,
+          finalUrl: gitlabApiUrl,
+        });
       }
     } catch (error) {
-      console.error(`Invalid GitLab API URL: ${gitlabApiUrl}`, error);
+      authLogger.error('Invalid GitLab API URL', { url: gitlabApiUrl, error });
       return null;
     }
 
@@ -141,34 +146,43 @@ class GitLabStreamableHttpServer {
       axiosInstance.interceptors.request.use(
         config => {
           const maskedToken = gitlabApiToken.substring(0, 8) + '...';
-          console.log(
-            `GitLab API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`
-          );
-          console.log(`Headers: PRIVATE-TOKEN: ${maskedToken}`);
-          if (config.data) {
-            console.log(`Body: ${JSON.stringify(config.data).substring(0, 200)}...`);
-          }
+          apiLogger.http('GitLab API Request', {
+            method: config.method?.toUpperCase(),
+            url: `${config.baseURL}${config.url}`,
+            token: maskedToken,
+            hasBody: !!config.data,
+            bodyPreview: config.data ? JSON.stringify(config.data).substring(0, 100) : undefined,
+          });
           return config;
         },
         error => {
-          console.error('GitLab API Request Error:', error.message);
+          apiLogger.error('GitLab API Request Error', { error: error.message });
           return Promise.reject(error);
         }
       );
 
       axiosInstance.interceptors.response.use(
         response => {
-          console.log(`GitLab API Response: ${response.status} ${response.statusText}`);
+          apiLogger.http('GitLab API Response', {
+            status: response.status,
+            statusText: response.statusText,
+            url: response.config.url,
+          });
           return response;
         },
         error => {
           if (error.response) {
-            console.error(
-              `GitLab API Error: ${error.response.status} ${error.response.statusText}`
-            );
-            console.error(`Response: ${JSON.stringify(error.response.data).substring(0, 200)}...`);
+            apiLogger.error('GitLab API Error', {
+              status: error.response.status,
+              statusText: error.response.statusText,
+              url: error.config?.url,
+              responsePreview: JSON.stringify(error.response.data).substring(0, 200),
+            });
           } else {
-            console.error('GitLab API Network Error:', error.message);
+            apiLogger.error('GitLab API Network Error', {
+              error: error.message,
+              url: error.config?.url,
+            });
           }
           return Promise.reject(error);
         }
@@ -196,12 +210,17 @@ class GitLabStreamableHttpServer {
       };
 
       this.sessions.set(sessionKey, sessionData);
-      console.log(`Created new session: ${gitlabApiToken.substring(0, 8)}... for ${gitlabApiUrl}`);
+      sessionLogger.info('Created new session', {
+        tokenPreview: gitlabApiToken.substring(0, 8) + '...',
+        gitlabUrl: gitlabApiUrl,
+      });
       const stats = this.getSessionStats();
-      console.log(`Total active sessions: ${stats.totalSessions}`);
+      sessionLogger.info('Session statistics', { totalSessions: stats.totalSessions });
       return sessionData;
     } catch (error: any) {
-      console.error('GitLab authentication failed:', error.response?.data || error.message);
+      authLogger.error('GitLab authentication failed', {
+        error: error.response?.data || error.message,
+      });
 
       // Check for specific token expiration error
       if (
@@ -484,7 +503,7 @@ class GitLabStreamableHttpServer {
       res.writeHead(404, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'Not found' }));
     } catch (error: any) {
-      console.error('Request handling error:', error);
+      serverLogger.error('Request handling error', { error, url: req.url, method: req.method });
       if (!res.headersSent) {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Internal server error' }));
@@ -525,18 +544,20 @@ class GitLabStreamableHttpServer {
         const sessionAge = Math.floor(
           (now.getTime() - currentSession.lastUsed.getTime()) / (1000 * 60 * 60 * 24)
         );
-        console.log(
-          `Cleaning up inactive session: ${sessionKey.split(':')[0].substring(0, 8)}... (inactive for ${sessionAge} days)`
-        );
+        sessionLogger.info('Cleaning up inactive session', {
+          tokenPreview: sessionKey.split(':')[0].substring(0, 8) + '...',
+          inactiveDays: sessionAge,
+        });
         this.sessions.delete(sessionKey);
         cleanedCount++;
       }
     }
 
     if (cleanedCount > 0) {
-      console.log(
-        `Session cleanup completed: removed ${cleanedCount} sessions, ${sessionCount - cleanedCount} sessions remaining`
-      );
+      sessionLogger.info('Session cleanup completed', {
+        removedSessions: cleanedCount,
+        remainingSessions: sessionCount - cleanedCount,
+      });
     }
   }
 
@@ -572,7 +593,10 @@ class GitLabStreamableHttpServer {
         this.cleanupInactiveSessions();
         const stats = this.getSessionStats();
         if (stats.totalSessions > 0) {
-          console.log(`Active sessions: ${stats.totalSessions}, oldest: ${stats.oldestSession}`);
+          sessionLogger.debug('Active sessions status', {
+            totalSessions: stats.totalSessions,
+            oldestSession: stats.oldestSession,
+          });
         }
       },
       5 * 60 * 1000
@@ -584,20 +608,22 @@ class GitLabStreamableHttpServer {
 
     return new Promise((resolve, reject) => {
       this.httpServer!.listen(this.port, () => {
-        console.log(`GitLab MCP Streamable HTTP server running on port ${this.port}`);
-        console.log(`Health endpoint: http://localhost:${this.port}/health`);
-        console.log(`Heartbeat endpoint: http://localhost:${this.port}/heartbeat`);
-        console.log(`MCP endpoint: http://localhost:${this.port}/mcp`);
+        serverLogger.info('GitLab MCP Streamable HTTP server started', {
+          port: this.port,
+          healthEndpoint: `http://localhost:${this.port}/health`,
+          heartbeatEndpoint: `http://localhost:${this.port}/heartbeat`,
+          mcpEndpoint: `http://localhost:${this.port}/mcp`,
+        });
         resolve();
       });
 
       this.httpServer!.on('error', (error: any) => {
-        console.error('HTTP server error:', error);
         if (this.httpServer!.listening) {
           // Runtime error - log but don't crash
-          console.error('HTTP server runtime error - server may be unstable');
+          serverLogger.error('HTTP server runtime error - server may be unstable', { error });
         } else {
           // Startup error - reject promise
+          serverLogger.error('HTTP server startup error', { error });
           reject(error);
         }
       });
@@ -629,19 +655,19 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   // Handle graceful shutdown
   process.on('SIGINT', async () => {
-    console.log('\nReceived SIGINT, shutting down gracefully...');
+    serverLogger.info('Received SIGINT, shutting down gracefully...');
     await server.stop();
     process.exit(0);
   });
 
   process.on('SIGTERM', async () => {
-    console.log('\nReceived SIGTERM, shutting down gracefully...');
+    serverLogger.info('Received SIGTERM, shutting down gracefully...');
     await server.stop();
     process.exit(0);
   });
 
   server.start().catch(error => {
-    console.error('Failed to start server:', error);
+    serverLogger.error('Failed to start server', { error });
     process.exit(1);
   });
 }
