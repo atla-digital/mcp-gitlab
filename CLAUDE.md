@@ -10,6 +10,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run watch` - Watch TypeScript files for changes and recompile
 - `npm run inspector` - Start MCP inspector for debugging server
 
+### Code Quality & Linting
+```bash
+# Lint and format code
+npm run lint            # Check linting issues
+npm run lint:fix        # Auto-fix linting issues
+npm run format          # Format code with Prettier
+npm run format:check    # Check code formatting
+```
+
 ### CI/CD & Documentation
 ```bash
 # Install git hooks for automatic documentation generation
@@ -65,6 +74,65 @@ The server implements the Streamable HTTP MCP transport protocol, running as an 
 
 ### Resource System
 The server exposes GitLab projects as MCP resources via `gitlab://projects` URI, handled by `src/utils/resource-handlers.ts`.
+
+### Configuration Management
+
+The server uses **Zod-validated configuration** from environment variables with sensible defaults:
+
+#### Configuration Schema (`src/utils/config.ts`)
+- **Server**: `PORT`, `NODE_ENV`
+- **Logging**: `LOG_LEVEL` (error|warn|info|http|debug)
+- **Sessions**: `SESSION_MAX_AGE`, `SESSION_CLEANUP_INTERVAL`
+- **HTTP**: `AXIOS_TIMEOUT` (request timeout in ms)
+- **Development**: `ENABLE_REQUEST_LOGGING`, `ENABLE_DETAILED_ERRORS`
+
+#### Environment Setup
+```bash
+# Copy example configuration
+cp .env.example .env
+
+# Edit with your values
+nano .env
+```
+
+**Example `.env.example`**:
+```env
+PORT=3000
+NODE_ENV=development
+LOG_LEVEL=info
+SESSION_MAX_AGE=604800000        # 7 days
+SESSION_CLEANUP_INTERVAL=300000  # 5 minutes
+AXIOS_TIMEOUT=30000              # 30 seconds
+ENABLE_REQUEST_LOGGING=true
+ENABLE_DETAILED_ERRORS=false
+```
+
+### Structured Logging
+
+The server implements **Winston-based structured logging** with component-specific loggers:
+
+#### Log Components
+- **API Logger**: GitLab API requests/responses (`GitLab-API`)
+- **Session Logger**: Session lifecycle events (`Session`)
+- **Server Logger**: HTTP server events (`HTTP-Server`) 
+- **Auth Logger**: Authentication events (`Auth`)
+
+#### Log Levels & Output
+- **Console**: Colorized, human-readable format
+- **File** (production): JSON format in `logs/` directory
+- **Configurable**: Set `LOG_LEVEL` environment variable
+
+#### Example Log Entry
+```json
+{
+  "timestamp": "2025-08-12 22:54:15:5415",
+  "level": "info",
+  "message": "Created new session",
+  "component": "Session",
+  "tokenPreview": "glpat-xx...",
+  "gitlabUrl": "https://gitlab.com/api/v4"
+}
+```
 
 ### MCP Prompts for Workflow Guidance
 
@@ -404,6 +472,33 @@ npm run generate-docs
 # Complete build and documentation workflow
 npm run build && npm run generate-docs
 ```
+
+## Code Quality & Best Practices
+
+### ESLint & Prettier Integration
+- **ESLint 9** with TypeScript support and strict rules
+- **Prettier** integration for consistent code formatting
+- **Pre-configured rules** for Node.js and TypeScript best practices
+- **Auto-fix capabilities** via npm scripts
+
+#### Code Quality Commands
+```bash
+npm run lint            # Check for linting issues
+npm run lint:fix        # Auto-fix linting and formatting issues
+npm run format          # Format code with Prettier
+npm run format:check    # Check if code is formatted correctly
+```
+
+#### Configuration Files
+- `eslint.config.js` - ESLint configuration with TypeScript support
+- `.prettierrc` - Prettier formatting rules
+- `.prettierignore` - Files to exclude from formatting
+
+### Development Workflow
+1. **Write code** following TypeScript best practices
+2. **Run linting** with `npm run lint:fix` to auto-format
+3. **Build and test** with `npm run build`
+4. **Commit changes** (pre-commit hooks auto-generate docs)
 
 ## Important Development Notes
 

@@ -177,6 +177,75 @@ Alternatively, you can manually add the following to your MCP settings file (`~/
 -H "X-GitLab-URL: https://gitlab.com/api/v4"
 ```
 
+#### Environment Configuration
+
+The server supports configuration via environment variables with validation and sensible defaults:
+
+```bash
+# Copy the example configuration
+cp .env.example .env
+
+# Edit with your values
+nano .env
+```
+
+**Available Configuration Options:**
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PORT` | Server port | `3000` |
+| `NODE_ENV` | Environment (development/production/test) | `development` |
+| `LOG_LEVEL` | Logging level (error/warn/info/http/debug) | `info` |
+| `SESSION_MAX_AGE` | Session lifetime in milliseconds | `604800000` (7 days) |
+| `SESSION_CLEANUP_INTERVAL` | Session cleanup interval in milliseconds | `300000` (5 minutes) |
+| `AXIOS_TIMEOUT` | HTTP request timeout in milliseconds | `30000` (30 seconds) |
+| `ENABLE_REQUEST_LOGGING` | Enable detailed API request logging | `true` |
+| `ENABLE_DETAILED_ERRORS` | Enable detailed error messages | `false` |
+
+**Example `.env` file:**
+```env
+PORT=3000
+NODE_ENV=development
+LOG_LEVEL=info
+SESSION_MAX_AGE=604800000
+SESSION_CLEANUP_INTERVAL=300000
+AXIOS_TIMEOUT=30000
+ENABLE_REQUEST_LOGGING=true
+ENABLE_DETAILED_ERRORS=false
+```
+
+#### Logging & Monitoring
+
+The server features comprehensive structured logging with Winston:
+
+**Log Components:**
+- **API Logger**: GitLab API requests and responses
+- **Session Logger**: Session creation, cleanup, and lifecycle
+- **Server Logger**: HTTP server events and errors
+- **Auth Logger**: Authentication and authorization events
+
+**Log Formats:**
+- **Console**: Colorized, human-readable format for development
+- **Files**: JSON format in production (saved to `logs/` directory)
+
+**Log Level Control:**
+Set the `LOG_LEVEL` environment variable to control verbosity:
+- `error`: Only errors
+- `warn`: Warnings and errors
+- `info`: General information, warnings, and errors (default)
+- `http`: HTTP requests/responses plus above
+- `debug`: Detailed debugging information plus above
+
+**Production Logging:**
+```bash
+# Set log level for production
+LOG_LEVEL=warn NODE_ENV=production npm start
+
+# View logs in production
+tail -f logs/combined.log
+tail -f logs/error.log
+```
+
 ### Updating to Latest Version
 
 To update to the latest version when using the pre-built Docker image:
