@@ -1,0 +1,6 @@
+build/
+node_modules/
+*.log
+.env*
+*.md
+package-lock.json

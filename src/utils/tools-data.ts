@@ -10,4 +10,4 @@ export { toolDefinitions } from '../tools/definitions/index.js';
 export { repositoryToolDefinitions as repositoryTools } from '../tools/definitions/repository.js';
 export { integrationToolDefinitions as integrationTools } from '../tools/definitions/integrations.js';
 export { cicdToolDefinitions as cicdTools } from '../tools/definitions/ci-cd.js';
-export { usersGroupsToolDefinitions as usersGroupsTools } from '../tools/definitions/users-groups.js'; 
+export { usersGroupsToolDefinitions as usersGroupsTools } from '../tools/definitions/users-groups.js';

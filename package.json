@@ -17,6 +17,10 @@
     "start": "node build/server/streamable-http-server.js",
     "start:http": "node build/server/streamable-http-server.js",
     "inspector:http": "npx @modelcontextprotocol/inspector streamableHttp \"http://localhost:3001/mcp\"",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write src/**/*.ts",
+    "format:check": "prettier --check src/**/*.ts",
     "install-hooks": "cp -f git-hooks/pre-commit .git/hooks/ && chmod +x .git/hooks/pre-commit",
     "generate-docs": "node scripts/generate-tools-md.js"
   },
@@ -26,6 +30,12 @@
   },
   "devDependencies": {
     "@types/node": "^20.11.24",
+    "@typescript-eslint/eslint-plugin": "^8.39.1",
+    "@typescript-eslint/parser": "^8.39.1",
+    "eslint": "^9.33.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prettier": "^3.6.2",
     "typescript": "^5.3.3"
   }
 }

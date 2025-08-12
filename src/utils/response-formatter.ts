@@ -2,48 +2,57 @@
  * Utility functions for formatting MCP responses
  */
 
-import { McpError, ErrorCode } from "@modelcontextprotocol/sdk/types.js";
-import axios from "axios";
+import { McpError, ErrorCode } from '@modelcontextprotocol/sdk/types.js';
+import axios from 'axios';
 
 /**
  * Format an API response for MCP protocol with structured content support
- * 
+ *
  * @param data The data to format
  * @param options Optional formatting options
  * @returns Formatted MCP response with both text and structured content
  */
-export function formatResponse(data: any, options?: { 
-  includeStructuredContent?: boolean;
-  textOnly?: boolean;
-}) {
+export function formatResponse(
+  data: any,
+  options?: {
+    includeStructuredContent?: boolean;
+    textOnly?: boolean;
+  }
+) {
   const textContent = JSON.stringify(data, null, 2);
-  
+
   // If textOnly is specified, return only text content for backwards compatibility
   if (options?.textOnly) {
     return {
-      content: [{
-        type: 'text' as const,
-        text: textContent
-      }]
+      content: [
+        {
+          type: 'text' as const,
+          text: textContent,
+        },
+      ],
     };
   }
-  
+
   // Default behavior: include both text and structured content
   const response: any = {
-    content: [{
-      type: 'text' as const,
-      text: textContent
-    }]
+    content: [
+      {
+        type: 'text' as const,
+        text: textContent,
+      },
+    ],
   };
-  
+
   // Add structured content if enabled (default true) and data is an object
-  if ((options?.includeStructuredContent !== false) && 
-      data && 
-      typeof data === 'object' && 
-      !Array.isArray(data)) {
+  if (
+    options?.includeStructuredContent !== false &&
+    data &&
+    typeof data === 'object' &&
+    !Array.isArray(data)
+  ) {
     response.structuredContent = data;
   }
-  
+
   return response;
 }
 
@@ -98,7 +107,7 @@ export function formatMergeRequestResponse(mergeRequest: any) {
 
 /**
  * Handle errors from API calls
- * 
+ *
  * @param error The error object
  * @param defaultMessage Default message to use
  * @returns McpError object
@@ -111,13 +120,7 @@ export function handleApiError(error: unknown, defaultMessage: string): McpError
     );
   }
   if (error instanceof Error) {
-    return new McpError(
-      ErrorCode.InternalError,
-      `${defaultMessage}: ${error.message}`
-    );
+    return new McpError(ErrorCode.InternalError, `${defaultMessage}: ${error.message}`);
   }
-  return new McpError(
-    ErrorCode.InternalError,
-    defaultMessage
-  );
-} 
+  return new McpError(ErrorCode.InternalError, defaultMessage);
+}

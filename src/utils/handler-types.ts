@@ -2,9 +2,13 @@
  * Common types and interfaces for GitLab tool handlers
  */
 
-import { AxiosInstance } from "axios";
-import { CallToolRequest } from "@modelcontextprotocol/sdk/types.js";
-import { IntegrationsManager, CiCdManager, UsersGroupsManager } from "../services/managers/index.js";
+import { AxiosInstance } from 'axios';
+import { CallToolRequest } from '@modelcontextprotocol/sdk/types.js';
+import {
+  IntegrationsManager,
+  CiCdManager,
+  UsersGroupsManager,
+} from '../services/managers/index.js';
 
 /**
  * Context object passed to all tool handlers
@@ -29,4 +33,4 @@ export type ToolHandler = (
  */
 export interface ToolRegistry {
   [toolName: string]: ToolHandler;
-} 
+}

@@ -1,6 +1,6 @@
 /**
  * GitLab MCP Prompts Definitions
- * 
+ *
  * This file contains prompt templates for common GitLab workflows.
  * These prompts provide guidance for multi-step operations.
  */
@@ -20,45 +20,51 @@ export interface PromptDefinition {
  */
 export const promptDefinitions: PromptDefinition[] = [
   {
-    name: "analyze-issue",
-    description: "Comprehensive workflow to analyze GitLab issues and determine appropriate action - can result in zero, one, or multiple outcomes based on analysis",
+    name: 'analyze-issue',
+    description:
+      'Comprehensive workflow to analyze GitLab issues and determine appropriate action - can result in zero, one, or multiple outcomes based on analysis',
     arguments: [
       {
-        name: "additional_instructions",
-        description: "Optional criteria or focus areas for issue selection and analysis (e.g., 'select issues that solve bugs', 'focus on security-related issues', 'prioritize performance improvements')",
-        required: false
-      }
-    ]
+        name: 'additional_instructions',
+        description:
+          "Optional criteria or focus areas for issue selection and analysis (e.g., 'select issues that solve bugs', 'focus on security-related issues', 'prioritize performance improvements')",
+        required: false,
+      },
+    ],
   },
   {
-    name: "work-on-mr",
-    description: "Comprehensive workflow for working on merge requests - handles both initial implementation and implementing review suggestions based on current state",
+    name: 'work-on-mr',
+    description:
+      'Comprehensive workflow for working on merge requests - handles both initial implementation and implementing review suggestions based on current state',
     arguments: [
       {
-        name: "additional_instructions",
-        description: "Optional additional focus areas or specific requirements (e.g., 'focus on security', 'implement specific reviewer suggestions', 'prioritize performance optimization')",
-        required: false
-      }
-    ]
+        name: 'additional_instructions',
+        description:
+          "Optional additional focus areas or specific requirements (e.g., 'focus on security', 'implement specific reviewer suggestions', 'prioritize performance optimization')",
+        required: false,
+      },
+    ],
   },
   {
-    name: "code-review",
-    description: "Comprehensive workflow for conducting thorough, constructive code reviews on GitLab merge requests with emphasis on line-specific feedback and merge execution when criteria are met and suggestions implemented",
+    name: 'code-review',
+    description:
+      'Comprehensive workflow for conducting thorough, constructive code reviews on GitLab merge requests with emphasis on line-specific feedback and merge execution when criteria are met and suggestions implemented',
     arguments: [
       {
-        name: "additional_instructions",
-        description: "Optional additional focus areas for the code review (e.g., 'focus on security vulnerabilities', 'emphasize performance optimization', 'check for accessibility compliance', 'review API design patterns')",
-        required: false
-      }
-    ]
-  }
+        name: 'additional_instructions',
+        description:
+          "Optional additional focus areas for the code review (e.g., 'focus on security vulnerabilities', 'emphasize performance optimization', 'check for accessibility compliance', 'review API design patterns')",
+        required: false,
+      },
+    ],
+  },
 ];
 
 /**
  * Prompt templates with actual content
  */
 export const promptTemplates: Record<string, string> = {
-  "analyze-issue": `# Issue Analysis & Action Planning Workflow
+  'analyze-issue': `# Issue Analysis & Action Planning Workflow
 
 This workflow helps analyze GitLab issues and determine the most appropriate course of action, which may result in zero, one, or multiple outcomes.
 
@@ -251,7 +257,7 @@ Begin by exploring available issues, then apply systematic analysis to determine
 
 **This is a request to perform the issue analysis workflow - please begin now.**`,
 
-  "work-on-mr": `# Work on Merge Request Workflow
+  'work-on-mr': `# Work on Merge Request Workflow
 
 This comprehensive workflow handles both initial implementation and implementing review suggestions based on the current state of your merge request.
 
@@ -589,7 +595,7 @@ Begin by checking your current branch and MR status, then proceed with the appro
 
 **This is a request to perform the work-on-mr workflow - please begin now.**`,
 
-  "code-review": `# Code Review Workflow
+  'code-review': `# Code Review Workflow
 
 This workflow guides you through conducting thorough, constructive code reviews on GitLab merge requests with emphasis on line-specific feedback and quality assurance.
 
@@ -944,5 +950,5 @@ Begin by identifying the merge request to review, then proceed through each step
 4. **Make a final decision** and execute the appropriate action (approve, request changes, discuss, or merge)
 5. **Complete the process** by taking the recommended action based on your assessment
 
-**This is a request to perform the code review workflow - please begin now.**`
+**This is a request to perform the code review workflow - please begin now.**`,
 };
