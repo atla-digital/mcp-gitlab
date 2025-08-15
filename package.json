@@ -22,7 +22,12 @@
     "format": "prettier --write src/**/*.ts",
     "format:check": "prettier --check src/**/*.ts",
     "install-hooks": "cp -f git-hooks/pre-commit .git/hooks/ && chmod +x .git/hooks/pre-commit",
-    "generate-docs": "node scripts/generate-tools-md.js"
+    "generate-docs": "node scripts/generate-tools-md.js",
+    "test:multi-client": "node tests/multi-client.test.js",
+    "test:stress": "node tests/session-stress.test.js",
+    "test:compliance": "node tests/mcp-compliance.test.js",
+    "test:all": "node tests/run-all-tests.js",
+    "test:quick": "node tests/run-all-tests.js --quick"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.13.2",
