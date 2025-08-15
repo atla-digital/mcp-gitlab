@@ -26,6 +26,9 @@
     "test:multi-client": "node tests/multi-client.test.js",
     "test:stress": "node tests/session-stress.test.js",
     "test:compliance": "node tests/mcp-compliance.test.js",
+    "test:recovery": "node tests/session-recovery.test.js",
+    "test:mock": "node tests/mock-server.test.js",
+    "test:tool-execution": "node tests/tool-execution.test.js",
     "test:all": "node tests/run-all-tests.js",
     "test:quick": "node tests/run-all-tests.js --quick"
   },

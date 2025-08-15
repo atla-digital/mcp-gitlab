@@ -7,6 +7,7 @@
 import { TestRunner } from './multi-client.test.js';
 import { SessionStressTest } from './session-stress.test.js';
 import { McpComplianceTest } from './mcp-compliance.test.js';
+import { ToolExecutionTest } from './tool-execution.test.js';
 import axios from 'axios';
 
 class TestOrchestrator {
@@ -96,6 +97,7 @@ class TestOrchestrator {
     const suites = [
       { name: 'Multi-Client Tests', key: 'Multi-Client Tests' },
       { name: 'MCP Compliance Tests', key: 'MCP Compliance Tests' },
+      { name: 'Tool Execution Tests', key: 'Tool Execution Tests' },
       { name: 'Session Stress Tests', key: 'Session Stress Tests' },
     ];
     
@@ -166,6 +168,11 @@ class TestOrchestrator {
       {
         name: 'MCP Compliance Tests',
         class: McpComplianceTest,
+        options: {},
+      },
+      {
+        name: 'Tool Execution Tests',
+        class: ToolExecutionTest,
         options: {},
       },
       {

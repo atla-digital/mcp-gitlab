@@ -1,16 +1,4 @@
 #!/usr/bin/env node
-import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import {
-  CallToolRequestSchema,
-  ListResourcesRequestSchema,
-  ListToolsRequestSchema,
-  ReadResourceRequestSchema,
-  ListPromptsRequestSchema,
-  GetPromptRequestSchema,
-  ErrorCode,
-  McpError,
-} from '@modelcontextprotocol/sdk/types.js';
 import { randomUUID } from 'crypto';
 import axios from 'axios';
 import { IncomingMessage, ServerResponse } from 'http';
@@ -33,11 +21,13 @@ interface SessionData {
   gitlabApiUrl: string;
   handlerContext: HandlerContext;
   lastUsed: Date;
+  sessionId?: string;
+  initialized: boolean;
+  initializationCount: number;
+  clientInfo?: any;
 }
 
 class GitLabStreamableHttpServer {
-  private server: Server;
-  private transport: StreamableHTTPServerTransport;
   private httpServer?: any;
   private sessions = new Map<string, SessionData>();
   private cleanupInterval?: NodeJS.Timeout;
@@ -46,37 +36,6 @@ class GitLabStreamableHttpServer {
 
   constructor(port: number = config.port) {
     this.port = port;
-
-    // Create single transport instance with JSON response support and session management
-    this.transport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: () => randomUUID(), // Enable session management
-      enableJsonResponse: true,
-    });
-
-    // Create single server instance
-    this.server = new Server(
-      {
-        name: 'mcp-gitlab',
-        version: '0.1.0',
-      },
-      {
-        capabilities: {
-          canListTools: true,
-          canCallTools: true,
-          canListResources: true,
-          canReadResources: true,
-          canListPrompts: true,
-          canGetPrompts: true,
-          tools: { listChanged: false },
-          resources: { listChanged: false, subscribe: false },
-          prompts: { listChanged: false },
-          completions: {},
-          experimental: {},
-        },
-      }
-    );
-
-    this.setupMCPHandlers();
   }
 
   /**
@@ -214,6 +173,10 @@ class GitLabStreamableHttpServer {
         gitlabApiUrl,
         handlerContext,
         lastUsed: new Date(),
+        sessionId: undefined, // Will be set during initialization
+        initialized: false,
+        initializationCount: 0,
+        clientInfo: undefined,
       };
 
       this.sessions.set(sessionKey, sessionData);
@@ -256,102 +219,44 @@ class GitLabStreamableHttpServer {
   /**
    * Set up MCP request handlers for the server instance
    */
-  private setupMCPHandlers() {
-    // List available tools
-    this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      return {
-        tools: toolDefinitions,
-      };
-    });
-
-    // List available resources
-    this.server.setRequestHandler(ListResourcesRequestSchema, async () => {
-      if (!this.currentSessionData) {
-        throw new McpError(ErrorCode.InvalidRequest, 'No active session');
-      }
-      return handleListResources();
-    });
-
-    // Read GitLab resources
-    this.server.setRequestHandler(ReadResourceRequestSchema, async request => {
-      if (!this.currentSessionData) {
-        throw new McpError(ErrorCode.InvalidRequest, 'No active session');
-      }
-      return handleReadResource(
-        request.params.uri,
-        this.currentSessionData.handlerContext.axiosInstance
-      );
-    });
-
-    // List available prompts
-    this.server.setRequestHandler(ListPromptsRequestSchema, async () => {
-      return {
-        prompts: promptDefinitions,
-      };
-    });
-
-    // Get specific prompt content
-    this.server.setRequestHandler(GetPromptRequestSchema, async request => {
-      const promptName = request.params.name;
-      const template = promptTemplates[promptName];
-
-      if (!template) {
-        throw new McpError(ErrorCode.InvalidRequest, `Unknown prompt: ${promptName}`);
-      }
-
-      let content = template;
-
-      // Replace argument placeholders if arguments are provided
-      if (request.params.arguments) {
-        for (const [key, value] of Object.entries(request.params.arguments)) {
-          const placeholder = `{{${key}}}`;
-          content = content.replace(new RegExp(placeholder, 'g'), String(value));
-        }
-      }
-
-      // Remove any remaining unused placeholders (especially for optional parameters)
-      content = content.replace(/\{\{additional_instructions\}\}\s*/g, '');
-
-      return {
-        description: promptDefinitions.find(p => p.name === promptName)?.description || '',
-        messages: [
-          {
-            role: 'user' as const,
-            content: {
-              type: 'text' as const,
-              text: content,
-            },
-          },
-        ],
-      };
-    });
-
-    // Call GitLab tools
-    this.server.setRequestHandler(CallToolRequestSchema, async request => {
-      try {
-        if (!this.currentSessionData) {
-          throw new McpError(ErrorCode.InvalidRequest, 'No active session');
-        }
-
-        const toolName = request.params.name;
-        const handler = toolRegistry[toolName];
-
-        if (!handler) {
-          throw new McpError(ErrorCode.InvalidRequest, `Unknown tool: ${toolName}`);
-        }
-
-        return await handler(request.params, this.currentSessionData.handlerContext);
-      } catch (error) {
-        if (error instanceof McpError) {
-          throw error;
-        }
-        throw handleApiError(error, 'Error executing GitLab operation');
-      }
-    });
-  }
 
   private async handleRequest(req: IncomingMessage, res: ServerResponse) {
+    // LOG ALL INCOMING REQUESTS WITH FULL DETAILS
+    const timestamp = new Date().toISOString();
+    const requestId = Math.random().toString(36).substring(2, 8);
+    
     try {
+      
+      // Log request basics
+      serverLogger.info(`[${requestId}] HTTP Request`, {
+        method: req.method,
+        url: req.url,
+        timestamp,
+        userAgent: req.headers['user-agent'] || 'none',
+        contentType: req.headers['content-type'] || 'none',
+        accept: req.headers.accept || 'none',
+        contentLength: req.headers['content-length'] || 'none',
+        host: req.headers.host || 'none',
+        origin: req.headers.origin || 'none'
+      });
+
+      // Log ALL headers (masking sensitive data)
+      const headers = { ...req.headers };
+      if (headers['x-gitlab-token']) {
+        const token = headers['x-gitlab-token'] as string;
+        headers['x-gitlab-token'] = token.substring(0, 8) + '...' + token.substring(token.length - 4);
+      }
+      serverLogger.info(`[${requestId}] All Headers`, headers);
+
+      // Log specific MCP-related headers
+      serverLogger.info(`[${requestId}] MCP Headers`, {
+        mcpSessionId: req.headers['mcp-session-id'] || 'none',
+        gitlabToken: req.headers['x-gitlab-token'] ? 
+          (req.headers['x-gitlab-token'] as string).substring(0, 8) + '...' : 'MISSING',
+        gitlabUrl: req.headers['x-gitlab-url'] || 'MISSING',
+        authorization: req.headers.authorization ? 'present' : 'none'
+      });
+
       // Handle CORS
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, DELETE');
@@ -410,11 +315,80 @@ class GitLabStreamableHttpServer {
         return;
       }
 
+      // Session management endpoints
+      if (req.url === '/sessions' && req.method === 'GET') {
+        const stats = this.getDetailedSessionStats();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(stats));
+        return;
+      }
+
+      if (req.url === '/sessions/cleanup' && req.method === 'POST') {
+        try {
+          const body = await this.readRequestBody(req);
+          const { sessionKey } = JSON.parse(body || '{}');
+          
+          if (!sessionKey) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'sessionKey required' }));
+            return;
+          }
+
+          const success = this.cleanupSession(sessionKey);
+          res.writeHead(success ? 200 : 404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success, 
+            message: success ? 'Session cleaned up' : 'Session not found' 
+          }));
+          return;
+        } catch (error: any) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: error.message }));
+          return;
+        }
+      }
+
+      if (req.url === '/sessions/reset' && req.method === 'POST') {
+        try {
+          const body = await this.readRequestBody(req);
+          const { sessionKey } = JSON.parse(body || '{}');
+          
+          if (!sessionKey) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'sessionKey required' }));
+            return;
+          }
+
+          const success = this.resetSessionInitialization(sessionKey);
+          res.writeHead(success ? 200 : 404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            success, 
+            message: success ? 'Session initialization reset' : 'Session not found' 
+          }));
+          return;
+        } catch (error: any) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: error.message }));
+          return;
+        }
+      }
+
       // MCP endpoint
       if (req.url === '/mcp') {
         // Read and parse the request body first
         const body = await this.readRequestBody(req);
         const parsedBody = body ? JSON.parse(body) : undefined;
+
+        // Log request body details for debugging
+        serverLogger.info(`[${requestId}] MCP Request Body`, {
+          hasBody: !!body,
+          bodyLength: body?.length || 0,
+          bodyPreview: body ? body.substring(0, 200) + (body.length > 200 ? '...' : '') : 'none',
+          method: parsedBody?.method || 'none',
+          id: parsedBody?.id || 'none',
+          hasParams: !!parsedBody?.params,
+          jsonrpcVersion: parsedBody?.jsonrpc || 'none'
+        });
 
         // Try to get session data for GitLab API access
         let sessionData = null;
@@ -498,8 +472,532 @@ class GitLabStreamableHttpServer {
         // Set current session data for handlers to use
         this.currentSessionData = sessionData;
 
-        // Handle the MCP request through the transport with parsed body
-        await this.transport.handleRequest(req, res, parsedBody);
+        // Handle ALL MCP requests with custom logic - no SDK transport needed
+        const customHandledMethods = ['initialize', 'notifications/initialized', 'tools/list', 'prompts/list', 'resources/list', 'tools/call', 'prompts/get', 'resources/read'];
+        const methodsNotRequiringSession = ['tools/list', 'prompts/list', 'resources/list', 'prompts/get'];
+        if (customHandledMethods.includes(parsedBody?.method) && (sessionData || methodsNotRequiringSession.includes(parsedBody?.method))) {
+          try {
+            const sessionKey = sessionData ? `${sessionData.gitlabApiToken}:${sessionData.gitlabApiUrl}` : null;
+            
+            if (parsedBody.method === 'initialize') {
+              // Handle initialization request - sessionKey must exist for initialization
+              if (!sessionKey) {
+                throw new Error('Session data required for initialization');
+              }
+              const initResult = await this.handleReinitialization(sessionKey, parsedBody.params || {});
+              
+              // Check if client expects SSE or JSON based on Accept header
+              const acceptHeader = req.headers.accept || '';
+              const expectsSSE = acceptHeader.includes('text/event-stream');
+              
+              // Send response in appropriate format
+              const responseData = {
+                jsonrpc: '2.0',
+                id: parsedBody.id,
+                result: initResult
+              };
+
+              if (expectsSSE) {
+                // Send as Server-Sent Events
+                const sseResponse = `event: message\ndata: ${JSON.stringify(responseData)}\n\n`;
+                serverLogger.info(`[${requestId}] Sending SSE initialization response`, {
+                  statusCode: 200,
+                  contentType: 'text/event-stream',
+                  sessionId: initResult.sessionId,
+                  responsePreview: sseResponse.substring(0, 200) + '...'
+                });
+                res.writeHead(200, {
+                  'Content-Type': 'text/event-stream',
+                  'Cache-Control': 'no-cache',
+                  'Connection': 'keep-alive',
+                  'Mcp-Session-Id': initResult.sessionId
+                });
+                res.end(sseResponse);
+              } else {
+                // Send as pure JSON
+                const jsonResponse = JSON.stringify(responseData);
+                serverLogger.info(`[${requestId}] Sending JSON initialization response`, {
+                  statusCode: 200,
+                  contentType: 'application/json',
+                  sessionId: initResult.sessionId,
+                  responseBody: jsonResponse
+                });
+                res.writeHead(200, {
+                  'Content-Type': 'application/json',
+                  'Mcp-Session-Id': initResult.sessionId
+                });
+                res.end(jsonResponse);
+              }
+            } else if (parsedBody.method === 'notifications/initialized') {
+              // Handle notifications/initialized request - just acknowledge
+              serverLogger.info(`[${requestId}] Handling notifications/initialized with custom logic`, {
+                sessionId: sessionData?.sessionId || 'none'
+              });
+              
+              // MCP notifications don't expect a response, so just send 204 No Content
+              serverLogger.info(`[${requestId}] Sending 204 No Content for notifications/initialized`, {
+                statusCode: 204
+              });
+              res.writeHead(204);
+              res.end();
+            } else if (parsedBody.method === 'tools/list') {
+              // Handle tools/list request
+              serverLogger.info(`[${requestId}] Handling tools/list with custom logic`);
+              
+              const responseData = {
+                jsonrpc: '2.0',
+                id: parsedBody.id,
+                result: { tools: toolDefinitions }
+              };
+
+              // Check if client expects SSE or JSON based on Accept header
+              const acceptHeader = req.headers.accept || '';
+              const expectsSSE = acceptHeader.includes('text/event-stream');
+              
+              if (expectsSSE) {
+                const sseResponse = `event: message\ndata: ${JSON.stringify(responseData)}\n\n`;
+                serverLogger.info(`[${requestId}] Sending SSE tools/list response`, {
+                  statusCode: 200,
+                  contentType: 'text/event-stream',
+                  toolCount: toolDefinitions.length
+                });
+                res.writeHead(200, {
+                  'Content-Type': 'text/event-stream',
+                  'Cache-Control': 'no-cache',
+                  'Connection': 'keep-alive'
+                });
+                res.end(sseResponse);
+              } else {
+                const jsonResponse = JSON.stringify(responseData);
+                serverLogger.info(`[${requestId}] Sending JSON tools/list response`, {
+                  statusCode: 200,
+                  contentType: 'application/json',
+                  toolCount: toolDefinitions.length
+                });
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(jsonResponse);
+              }
+            } else if (parsedBody.method === 'prompts/list') {
+              // Handle prompts/list request
+              serverLogger.info(`[${requestId}] Handling prompts/list with custom logic`);
+              
+              const responseData = {
+                jsonrpc: '2.0',
+                id: parsedBody.id,
+                result: { prompts: promptDefinitions }
+              };
+
+              // Check if client expects SSE or JSON based on Accept header
+              const acceptHeader = req.headers.accept || '';
+              const expectsSSE = acceptHeader.includes('text/event-stream');
+              
+              if (expectsSSE) {
+                const sseResponse = `event: message\ndata: ${JSON.stringify(responseData)}\n\n`;
+                serverLogger.info(`[${requestId}] Sending SSE prompts/list response`, {
+                  statusCode: 200,
+                  contentType: 'text/event-stream',
+                  promptCount: promptDefinitions.length
+                });
+                res.writeHead(200, {
+                  'Content-Type': 'text/event-stream',
+                  'Cache-Control': 'no-cache',
+                  'Connection': 'keep-alive'
+                });
+                res.end(sseResponse);
+              } else {
+                const jsonResponse = JSON.stringify(responseData);
+                serverLogger.info(`[${requestId}] Sending JSON prompts/list response`, {
+                  statusCode: 200,
+                  contentType: 'application/json',
+                  promptCount: promptDefinitions.length
+                });
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(jsonResponse);
+              }
+            } else if (parsedBody.method === 'resources/list') {
+              // Handle resources/list request
+              serverLogger.info(`[${requestId}] Handling resources/list with custom logic`);
+              
+              // Resources list doesn't require GitLab session (returns empty list by default)
+              const resourcesResult = await handleListResources();
+              const responseData = {
+                jsonrpc: '2.0',
+                id: parsedBody.id,
+                result: resourcesResult
+              };
+
+              // Check if client expects SSE or JSON based on Accept header
+              const acceptHeader = req.headers.accept || '';
+              const expectsSSE = acceptHeader.includes('text/event-stream');
+              
+              if (expectsSSE) {
+                const sseResponse = `event: message\ndata: ${JSON.stringify(responseData)}\n\n`;
+                serverLogger.info(`[${requestId}] Sending SSE resources/list response`, {
+                  statusCode: 200,
+                  contentType: 'text/event-stream',
+                  resourceCount: resourcesResult.resources?.length || 0
+                });
+                res.writeHead(200, {
+                  'Content-Type': 'text/event-stream',
+                  'Cache-Control': 'no-cache',
+                  'Connection': 'keep-alive'
+                });
+                res.end(sseResponse);
+              } else {
+                const jsonResponse = JSON.stringify(responseData);
+                serverLogger.info(`[${requestId}] Sending JSON resources/list response`, {
+                  statusCode: 200,
+                  contentType: 'application/json',
+                  resourceCount: resourcesResult.resources?.length || 0
+                });
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(jsonResponse);
+              }
+            } else if (parsedBody.method === 'tools/call') {
+              // Handle tools/call request with custom logic - this fixes "Server not initialized" errors
+              serverLogger.info(`[${requestId}] Handling tools/call with custom logic`, {
+                toolName: parsedBody.params?.name,
+                hasArguments: !!parsedBody.params?.arguments,
+                sessionId: sessionData?.sessionId || 'none'
+              });
+              
+              if (!sessionData) {
+                throw new Error('Session data required for tool calls');
+              }
+
+              const toolName = parsedBody.params?.name;
+              const toolArgs = parsedBody.params?.arguments || {};
+
+              if (!toolName || typeof toolName !== 'string') {
+                throw new Error('Tool name is required');
+              }
+
+              // Get tool handler from registry
+              const handler = toolRegistry[toolName];
+              if (!handler) {
+                throw new Error(`Unknown tool: ${toolName}`);
+              }
+
+              try {
+                // Call the tool handler with our session context
+                const result = await handler({ name: toolName, arguments: toolArgs }, sessionData.handlerContext);
+                
+                const responseData = {
+                  jsonrpc: '2.0',
+                  id: parsedBody.id,
+                  result: result
+                };
+
+                // Check if client expects SSE or JSON based on Accept header
+                const acceptHeader = req.headers.accept || '';
+                const expectsSSE = acceptHeader.includes('text/event-stream');
+                
+                if (expectsSSE) {
+                  const sseResponse = `event: message\ndata: ${JSON.stringify(responseData)}\n\n`;
+                  serverLogger.info(`[${requestId}] Sending SSE tools/call response`, {
+                    statusCode: 200,
+                    contentType: 'text/event-stream',
+                    toolName: toolName,
+                    success: true
+                  });
+                  res.writeHead(200, {
+                    'Content-Type': 'text/event-stream',
+                    'Cache-Control': 'no-cache',
+                    'Connection': 'keep-alive'
+                  });
+                  res.end(sseResponse);
+                } else {
+                  const jsonResponse = JSON.stringify(responseData);
+                  serverLogger.info(`[${requestId}] Sending JSON tools/call response`, {
+                    statusCode: 200,
+                    contentType: 'application/json',
+                    toolName: toolName,
+                    success: true
+                  });
+                  res.writeHead(200, { 'Content-Type': 'application/json' });
+                  res.end(jsonResponse);
+                }
+              } catch (toolError: any) {
+                // Handle tool execution errors
+                const errorResponse = {
+                  jsonrpc: '2.0',
+                  id: parsedBody.id,
+                  error: {
+                    code: -32603,
+                    message: toolError.message || 'Tool execution failed',
+                    data: { toolName: toolName }
+                  }
+                };
+
+                const acceptHeader = req.headers.accept || '';
+                const expectsSSE = acceptHeader.includes('text/event-stream');
+                
+                if (expectsSSE) {
+                  const sseResponse = `event: message\ndata: ${JSON.stringify(errorResponse)}\n\n`;
+                  serverLogger.error(`[${requestId}] Sending SSE tools/call error response`, {
+                    statusCode: 400,
+                    contentType: 'text/event-stream',
+                    toolName: toolName,
+                    error: toolError.message
+                  });
+                  res.writeHead(400, {
+                    'Content-Type': 'text/event-stream',
+                    'Cache-Control': 'no-cache',
+                    'Connection': 'keep-alive'
+                  });
+                  res.end(sseResponse);
+                } else {
+                  const jsonResponse = JSON.stringify(errorResponse);
+                  serverLogger.error(`[${requestId}] Sending JSON tools/call error response`, {
+                    statusCode: 400,
+                    contentType: 'application/json',
+                    toolName: toolName,
+                    error: toolError.message
+                  });
+                  res.writeHead(400, { 'Content-Type': 'application/json' });
+                  res.end(jsonResponse);
+                }
+              }
+            } else if (parsedBody.method === 'prompts/get') {
+              // Handle prompts/get request with custom logic
+              serverLogger.info(`[${requestId}] Handling prompts/get with custom logic`, {
+                promptName: parsedBody.params?.name
+              });
+              
+              const promptName = parsedBody.params?.name;
+              if (!promptName || typeof promptName !== 'string') {
+                throw new Error('Prompt name is required');
+              }
+
+              // Get prompt template
+              const template = promptTemplates[promptName];
+              if (!template) {
+                throw new Error(`Unknown prompt: ${promptName}`);
+              }
+
+              let content = template;
+
+              // Replace argument placeholders if arguments are provided
+              if (parsedBody.params?.arguments) {
+                for (const [key, value] of Object.entries(parsedBody.params.arguments)) {
+                  const placeholder = `{{${key}}}`;
+                  content = content.replace(new RegExp(placeholder, 'g'), String(value));
+                }
+              }
+
+              // Remove any remaining unused placeholders
+              content = content.replace(/\{\{additional_instructions\}\}\s*/g, '');
+
+              const responseData = {
+                jsonrpc: '2.0',
+                id: parsedBody.id,
+                result: {
+                  description: promptDefinitions.find(p => p.name === promptName)?.description || '',
+                  messages: [
+                    {
+                      role: 'user' as const,
+                      content: {
+                        type: 'text' as const,
+                        text: content,
+                      },
+                    },
+                  ],
+                }
+              };
+
+              // Send response in appropriate format
+              const acceptHeader = req.headers.accept || '';
+              const expectsSSE = acceptHeader.includes('text/event-stream');
+              
+              if (expectsSSE) {
+                const sseResponse = `event: message\ndata: ${JSON.stringify(responseData)}\n\n`;
+                serverLogger.info(`[${requestId}] Sending SSE prompts/get response`, {
+                  statusCode: 200,
+                  contentType: 'text/event-stream',
+                  promptName: promptName
+                });
+                res.writeHead(200, {
+                  'Content-Type': 'text/event-stream',
+                  'Cache-Control': 'no-cache',
+                  'Connection': 'keep-alive'
+                });
+                res.end(sseResponse);
+              } else {
+                const jsonResponse = JSON.stringify(responseData);
+                serverLogger.info(`[${requestId}] Sending JSON prompts/get response`, {
+                  statusCode: 200,
+                  contentType: 'application/json',
+                  promptName: promptName
+                });
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(jsonResponse);
+              }
+            } else if (parsedBody.method === 'resources/read') {
+              // Handle resources/read request with custom logic
+              serverLogger.info(`[${requestId}] Handling resources/read with custom logic`, {
+                uri: parsedBody.params?.uri
+              });
+              
+              if (!sessionData) {
+                throw new Error('Session data required for resource reading');
+              }
+
+              const uri = parsedBody.params?.uri;
+              if (!uri || typeof uri !== 'string') {
+                throw new Error('Resource URI is required');
+              }
+
+              try {
+                // Use our resource handler
+                const resourceResult = await handleReadResource(
+                  uri,
+                  sessionData.handlerContext.axiosInstance
+                );
+                
+                const responseData = {
+                  jsonrpc: '2.0',
+                  id: parsedBody.id,
+                  result: resourceResult
+                };
+
+                // Send response in appropriate format
+                const acceptHeader = req.headers.accept || '';
+                const expectsSSE = acceptHeader.includes('text/event-stream');
+                
+                if (expectsSSE) {
+                  const sseResponse = `event: message\ndata: ${JSON.stringify(responseData)}\n\n`;
+                  serverLogger.info(`[${requestId}] Sending SSE resources/read response`, {
+                    statusCode: 200,
+                    contentType: 'text/event-stream',
+                    uri: uri
+                  });
+                  res.writeHead(200, {
+                    'Content-Type': 'text/event-stream',
+                    'Cache-Control': 'no-cache',
+                    'Connection': 'keep-alive'
+                  });
+                  res.end(sseResponse);
+                } else {
+                  const jsonResponse = JSON.stringify(responseData);
+                  serverLogger.info(`[${requestId}] Sending JSON resources/read response`, {
+                    statusCode: 200,
+                    contentType: 'application/json',
+                    uri: uri
+                  });
+                  res.writeHead(200, { 'Content-Type': 'application/json' });
+                  res.end(jsonResponse);
+                }
+              } catch (resourceError: any) {
+                // Handle resource read errors
+                const errorResponse = {
+                  jsonrpc: '2.0',
+                  id: parsedBody.id,
+                  error: {
+                    code: -32603,
+                    message: resourceError.message || 'Resource read failed',
+                    data: { uri: uri }
+                  }
+                };
+
+                const acceptHeader = req.headers.accept || '';
+                const expectsSSE = acceptHeader.includes('text/event-stream');
+                
+                if (expectsSSE) {
+                  const sseResponse = `event: message\ndata: ${JSON.stringify(errorResponse)}\n\n`;
+                  serverLogger.error(`[${requestId}] Sending SSE resources/read error response`, {
+                    statusCode: 400,
+                    contentType: 'text/event-stream',
+                    uri: uri,
+                    error: resourceError.message
+                  });
+                  res.writeHead(400, {
+                    'Content-Type': 'text/event-stream',
+                    'Cache-Control': 'no-cache',
+                    'Connection': 'keep-alive'
+                  });
+                  res.end(sseResponse);
+                } else {
+                  const jsonResponse = JSON.stringify(errorResponse);
+                  serverLogger.error(`[${requestId}] Sending JSON resources/read error response`, {
+                    statusCode: 400,
+                    contentType: 'application/json',
+                    uri: uri,
+                    error: resourceError.message
+                  });
+                  res.writeHead(400, { 'Content-Type': 'application/json' });
+                  res.end(jsonResponse);
+                }
+              }
+            }
+            
+            // Clear current session data and return early
+            this.currentSessionData = null;
+            return;
+          } catch (error: any) {
+            sessionLogger.error('Custom request handler failed', { 
+              error: error.message,
+              method: parsedBody?.method
+            });
+            
+            // Send error response for failed custom handlers
+            const errorResponse = {
+              jsonrpc: '2.0',
+              id: parsedBody?.id || null,
+              error: {
+                code: -32603,
+                message: error.message || 'Internal error'
+              }
+            };
+
+            const acceptHeader = req.headers.accept || '';
+            const expectsSSE = acceptHeader.includes('text/event-stream');
+            
+            if (expectsSSE) {
+              const sseResponse = `event: message\ndata: ${JSON.stringify(errorResponse)}\n\n`;
+              res.writeHead(500, {
+                'Content-Type': 'text/event-stream',
+                'Cache-Control': 'no-cache',
+                'Connection': 'keep-alive'
+              });
+              res.end(sseResponse);
+            } else {
+              res.writeHead(500, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify(errorResponse));
+            }
+            return;
+          }
+        }
+
+        // If method is not handled, return method not found error
+        const errorResponse = {
+          jsonrpc: '2.0',
+          id: parsedBody?.id || null,
+          error: {
+            code: -32601,
+            message: `Method not found: ${parsedBody?.method || 'unknown'}`
+          }
+        };
+
+        serverLogger.warn(`[${requestId}] Unknown method requested`, {
+          method: parsedBody?.method,
+          availableMethods: customHandledMethods
+        });
+
+        const acceptHeader = req.headers.accept || '';
+        const expectsSSE = acceptHeader.includes('text/event-stream');
+        
+        if (expectsSSE) {
+          const sseResponse = `event: message\ndata: ${JSON.stringify(errorResponse)}\n\n`;
+          res.writeHead(404, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive'
+          });
+          res.end(sseResponse);
+        } else {
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(errorResponse));
+        }
 
         // Clear current session data
         this.currentSessionData = null;
@@ -510,10 +1008,20 @@ class GitLabStreamableHttpServer {
       res.writeHead(404, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'Not found' }));
     } catch (error: any) {
-      serverLogger.error('Request handling error', { error, url: req.url, method: req.method });
+      serverLogger.error(`[${requestId}] Request handling error`, { 
+        error: error.message, 
+        stack: error.stack?.substring(0, 500),
+        url: req.url, 
+        method: req.method 
+      });
       if (!res.headersSent) {
         res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Internal server error' }));
+        const errorResponse = JSON.stringify({ error: 'Internal server error' });
+        serverLogger.error(`[${requestId}] Sending 500 response`, { 
+          statusCode: 500, 
+          responseBody: errorResponse 
+        });
+        res.end(errorResponse);
       }
     } finally {
       // Always clear current session data
@@ -590,10 +1098,115 @@ class GitLabStreamableHttpServer {
     };
   }
 
-  async start(): Promise<void> {
-    // Connect server to transport (transport starts automatically)
-    await this.server.connect(this.transport);
+  /**
+   * Clean up a specific session by session key
+   */
+  cleanupSession(sessionKey: string): boolean {
+    const session = this.sessions.get(sessionKey);
+    if (session) {
+      this.sessions.delete(sessionKey);
+      sessionLogger.info('Session cleaned up', {
+        sessionKey: sessionKey.split(':')[0].substring(0, 8) + '...',
+        sessionId: session.sessionId,
+      });
+      return true;
+    }
+    return false;
+  }
 
+  /**
+   * Reset initialization state for a specific session
+   */
+  resetSessionInitialization(sessionKey: string): boolean {
+    const session = this.sessions.get(sessionKey);
+    if (session) {
+      session.initialized = false;
+      session.initializationCount = 0;
+      session.sessionId = undefined;
+      session.clientInfo = undefined;
+      session.lastUsed = new Date();
+      sessionLogger.info('Session initialization reset', {
+        sessionKey: sessionKey.split(':')[0].substring(0, 8) + '...',
+      });
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Get detailed session information
+   */
+  getDetailedSessionStats(): any {
+    const sessions = Array.from(this.sessions.entries()).map(([key, session]) => ({
+      key: key.split(':')[0].substring(0, 8) + '...',
+      sessionId: session.sessionId,
+      initialized: session.initialized,
+      initializationCount: session.initializationCount,
+      lastUsed: session.lastUsed.toISOString(),
+      clientInfo: session.clientInfo?.name || 'unknown',
+    }));
+
+    return {
+      totalSessions: this.sessions.size,
+      sessions,
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Handle reinitialization gracefully by resetting session state
+   */
+  async handleReinitialization(sessionKey: string, initParams: any): Promise<any> {
+    const session = this.sessions.get(sessionKey);
+    if (!session) {
+      throw new Error('Session not found');
+    }
+
+    // If this is a reinitialization attempt, reset the session state
+    if (session.initialized) {
+      sessionLogger.warn('Reinitialization detected - resetting session state', {
+        sessionKey: sessionKey.split(':')[0].substring(0, 8) + '...',
+        previousInitCount: session.initializationCount,
+        previousSessionId: session.sessionId,
+      });
+      
+      // Reset initialization state but keep the session
+      session.initialized = false;
+      session.sessionId = undefined;
+    }
+
+    // Generate new session ID and update state
+    const newSessionId = randomUUID();
+    session.sessionId = newSessionId;
+    session.initialized = true;
+    session.initializationCount += 1;
+    session.clientInfo = initParams.clientInfo;
+    session.lastUsed = new Date();
+
+    sessionLogger.info('Session (re)initialized successfully', {
+      sessionKey: sessionKey.split(':')[0].substring(0, 8) + '...',
+      sessionId: newSessionId,
+      initCount: session.initializationCount,
+      clientName: initParams.clientInfo?.name || 'unknown',
+    });
+
+    return {
+      protocolVersion: initParams.protocolVersion || '1.0.0',
+      capabilities: {
+        tools: { listChanged: false },
+        prompts: { listChanged: false },
+        resources: { listChanged: false, subscribe: false },
+        experimental: {},
+      },
+      serverInfo: {
+        name: 'mcp-gitlab',
+        version: '1.0.0',
+      },
+      sessionId: newSessionId,
+    };
+  }
+
+  async start(): Promise<void> {
     // Set up cleanup and monitoring intervals
     this.cleanupInterval = setInterval(() => {
       this.cleanupInactiveSessions();
@@ -641,9 +1254,6 @@ class GitLabStreamableHttpServer {
 
     // Clear all sessions
     this.sessions.clear();
-
-    // Close transport
-    await this.transport.close();
 
     if (this.httpServer) {
       return new Promise(resolve => {
