@@ -18,6 +18,11 @@ export const usersGroupsToolDefinitions = [
           description: 'Filter users by active status'
         }
       }
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -26,6 +31,11 @@ export const usersGroupsToolDefinitions = [
     inputSchema: {
       type: 'object',
       properties: {}
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -40,6 +50,11 @@ export const usersGroupsToolDefinitions = [
         }
       },
       required: ['user_id']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -57,6 +72,11 @@ export const usersGroupsToolDefinitions = [
           description: 'Limit to groups explicitly owned by the current user'
         }
       }
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -71,6 +91,11 @@ export const usersGroupsToolDefinitions = [
         }
       },
       required: ['group_id']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -85,6 +110,11 @@ export const usersGroupsToolDefinitions = [
         }
       },
       required: ['group_id']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -108,6 +138,11 @@ export const usersGroupsToolDefinitions = [
         }
       },
       required: ['group_id', 'user_id', 'access_level']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false
     }
   },
   {
@@ -122,6 +157,11 @@ export const usersGroupsToolDefinitions = [
         }
       },
       required: ['project_id']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -145,6 +185,11 @@ export const usersGroupsToolDefinitions = [
         }
       },
       required: ['project_id', 'user_id', 'access_level']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false
     }
   }
 ];

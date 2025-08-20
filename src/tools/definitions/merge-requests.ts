@@ -25,6 +25,11 @@ export const mergeRequestToolDefinitions = [
         }
       },
       required: ['project_id']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -43,6 +48,11 @@ export const mergeRequestToolDefinitions = [
         }
       },
       required: ['project_id', 'merge_request_iid']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -61,6 +71,11 @@ export const mergeRequestToolDefinitions = [
         }
       },
       required: ['project_id', 'merge_request_iid']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -83,6 +98,11 @@ export const mergeRequestToolDefinitions = [
         }
       },
       required: ['project_id', 'merge_request_iid', 'body']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false
     }
   },
   {
@@ -109,6 +129,11 @@ export const mergeRequestToolDefinitions = [
         }
       },
       required: ['project_id', 'merge_request_iid', 'body']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false
     }
   },
   {
@@ -127,6 +152,11 @@ export const mergeRequestToolDefinitions = [
         }
       },
       required: ['project_id', 'merge_request_iid']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -149,6 +179,11 @@ export const mergeRequestToolDefinitions = [
         }
       },
       required: ['project_id', 'merge_request_iid', 'discussion_id']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -219,6 +254,11 @@ export const mergeRequestToolDefinitions = [
         }
       },
       required: ['project_id', 'merge_request_iid', 'body']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false
     }
   },
   {
@@ -245,6 +285,11 @@ export const mergeRequestToolDefinitions = [
         }
       },
       required: ['project_id', 'merge_request_iid', 'discussion_id', 'body']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false
     }
   },
   {
@@ -271,6 +316,11 @@ export const mergeRequestToolDefinitions = [
         }
       },
       required: ['project_id', 'merge_request_iid', 'discussion_id', 'resolved']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -339,6 +389,11 @@ export const mergeRequestToolDefinitions = [
         }
       },
       required: ['project_id', 'source_branch', 'target_branch', 'title']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false
     }
   },
   {
@@ -365,6 +420,11 @@ export const mergeRequestToolDefinitions = [
         }
       },
       required: ['project_id', 'merge_request_iid']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -383,6 +443,11 @@ export const mergeRequestToolDefinitions = [
         }
       },
       required: ['project_id', 'merge_request_iid']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -413,6 +478,11 @@ export const mergeRequestToolDefinitions = [
         }
       },
       required: ['project_id', 'merge_request_iid']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false
     }
   }
 ];

@@ -15,6 +15,11 @@ export const integrationToolDefinitions = [
         }
       },
       required: ['project_id']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -33,6 +38,11 @@ export const integrationToolDefinitions = [
         }
       },
       required: ['project_id', 'integration']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -59,6 +69,11 @@ export const integrationToolDefinitions = [
         }
       },
       required: ['project_id', 'webhook']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -73,6 +88,11 @@ export const integrationToolDefinitions = [
         }
       },
       required: ['project_id']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -87,6 +107,11 @@ export const integrationToolDefinitions = [
         }
       },
       required: ['project_id']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -105,6 +130,11 @@ export const integrationToolDefinitions = [
         }
       },
       required: ['project_id', 'webhook_id']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -143,6 +173,11 @@ export const integrationToolDefinitions = [
         }
       },
       required: ['project_id', 'url']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false
     }
   },
   {
@@ -185,6 +220,11 @@ export const integrationToolDefinitions = [
         }
       },
       required: ['project_id', 'webhook_id', 'url']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -203,6 +243,11 @@ export const integrationToolDefinitions = [
         }
       },
       required: ['project_id', 'webhook_id']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false
     }
   },
   {
@@ -221,6 +266,11 @@ export const integrationToolDefinitions = [
         }
       },
       required: ['project_id', 'webhook_id']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false
     }
   }
 ];

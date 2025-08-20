@@ -152,6 +152,11 @@ export const issueToolDefinitions = [
         }
       },
       required: ['project_id', 'issue_iid']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -192,6 +197,11 @@ export const issueToolDefinitions = [
         }
       },
       required: ['project_id', 'issue_iid']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -210,6 +220,11 @@ export const issueToolDefinitions = [
         }
       },
       required: ['project_id', 'issue_iid']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -242,6 +257,11 @@ export const issueToolDefinitions = [
         }
       },
       required: ['project_id', 'issue_iid', 'target_project_id', 'target_issue_iid']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false
     }
   },
   {
@@ -264,6 +284,11 @@ export const issueToolDefinitions = [
         }
       },
       required: ['project_id', 'issue_iid', 'issue_link_id']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false
     }
   }
 ];

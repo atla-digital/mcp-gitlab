@@ -174,6 +174,11 @@ export const repositoryToolDefinitions = [
         }
       },
       required: ['project_id', 'file_path']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -196,6 +201,11 @@ export const repositoryToolDefinitions = [
         }
       },
       required: ['project_id', 'from', 'to']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -210,6 +220,11 @@ export const repositoryToolDefinitions = [
         }
       },
       required: ['remote_url']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -232,6 +247,11 @@ export const repositoryToolDefinitions = [
         }
       },
       required: ['project_id', 'branch', 'ref']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false
     }
   },
   {
@@ -250,6 +270,11 @@ export const repositoryToolDefinitions = [
         }
       },
       required: ['project_id', 'branch']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false
     }
   }
 ];

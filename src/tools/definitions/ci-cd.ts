@@ -28,6 +28,11 @@ export const cicdToolDefinitions = [
         }
       },
       required: ['project_id']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -46,6 +51,11 @@ export const cicdToolDefinitions = [
         }
       },
       required: ['project_id', 'pipeline_id']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -69,6 +79,11 @@ export const cicdToolDefinitions = [
         }
       },
       required: ['project_id', 'pipeline_id']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -91,6 +106,11 @@ export const cicdToolDefinitions = [
         }
       },
       required: ['project_id', 'job_id']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -109,6 +129,11 @@ export const cicdToolDefinitions = [
         }
       },
       required: ['project_id', 'job_id']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false
     }
   },
   {
@@ -123,6 +148,11 @@ export const cicdToolDefinitions = [
         }
       },
       required: ['project_id']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -141,6 +171,11 @@ export const cicdToolDefinitions = [
         }
       },
       required: ['project_id', 'trigger_id']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -159,6 +194,11 @@ export const cicdToolDefinitions = [
         }
       },
       required: ['project_id', 'description']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false
     }
   },
   {
@@ -181,6 +221,11 @@ export const cicdToolDefinitions = [
         }
       },
       required: ['project_id', 'trigger_id', 'description']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -199,6 +244,11 @@ export const cicdToolDefinitions = [
         }
       },
       required: ['project_id', 'trigger_id']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false
     }
   },
   {
@@ -226,6 +276,11 @@ export const cicdToolDefinitions = [
         }
       },
       required: ['project_id', 'ref', 'token']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false
     }
   },
   {
@@ -240,6 +295,11 @@ export const cicdToolDefinitions = [
         }
       },
       required: ['project_id']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -258,6 +318,11 @@ export const cicdToolDefinitions = [
         }
       },
       required: ['project_id', 'key']
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -288,6 +353,11 @@ export const cicdToolDefinitions = [
         }
       },
       required: ['project_id', 'key', 'value']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false
     }
   },
   {
@@ -318,6 +388,11 @@ export const cicdToolDefinitions = [
         }
       },
       required: ['project_id', 'key', 'value']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true
     }
   },
   {
@@ -336,6 +411,11 @@ export const cicdToolDefinitions = [
         }
       },
       required: ['project_id', 'key']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false
     }
   }
 ];

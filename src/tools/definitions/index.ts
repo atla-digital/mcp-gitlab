@@ -32,6 +32,11 @@ const promptToolDefinition = {
       }
     },
     required: ['name']
+  },
+  annotations: {
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true
   }
 };
 
