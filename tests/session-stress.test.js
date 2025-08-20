@@ -37,10 +37,13 @@ class SessionStressTest {
   }
 
   generateTestToken() {
-    return 'glpat-stress-' + randomUUID().substring(0, 12);
+    return process.env.TEST_GITLAB_TOKEN || 'glpat-stress-' + randomUUID().substring(0, 12);
   }
 
   generateTestGitLabUrl() {
+    if (process.env.TEST_GITLAB_URL) {
+      return process.env.TEST_GITLAB_URL;
+    }
     const domains = ['gitlab.com', 'gitlab.example.com', 'gitlab.test.com', 'code.company.com'];
     const domain = domains[Math.floor(Math.random() * domains.length)];
     return `https://${domain}/api/v4`;

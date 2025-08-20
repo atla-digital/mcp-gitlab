@@ -13,8 +13,8 @@ const MCP_ENDPOINT = `${SERVER_URL}/mcp`;
 class McpComplianceTest {
   constructor() {
     this.results = [];
-    this.testToken = 'glpat-compliance-test-' + randomUUID().substring(0, 8);
-    this.testGitlabUrl = 'https://gitlab.com/api/v4';
+    this.testToken = process.env.TEST_GITLAB_TOKEN || 'glpat-compliance-test-' + randomUUID().substring(0, 8);
+    this.testGitlabUrl = process.env.TEST_GITLAB_URL || 'https://gitlab.com/api/v4';
   }
 
   async log(message, data = {}) {

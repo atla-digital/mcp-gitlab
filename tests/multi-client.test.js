@@ -14,15 +14,23 @@ const MCP_ENDPOINT = `${SERVER_URL}/mcp`;
 const TEST_CONFIG = {
   serverUrl: SERVER_URL,
   mcpEndpoint: MCP_ENDPOINT,
-  // Mock GitLab tokens for testing
-  tokens: [
+  // Use real GitLab token from environment if available, otherwise mock tokens
+  tokens: process.env.TEST_GITLAB_TOKEN ? [
+    process.env.TEST_GITLAB_TOKEN,
+    process.env.TEST_GITLAB_TOKEN,
+    process.env.TEST_GITLAB_TOKEN,
+  ] : [
     'glpat-test-token-1-' + randomUUID().substring(0, 8),
     'glpat-test-token-2-' + randomUUID().substring(0, 8),
     'glpat-test-token-3-' + randomUUID().substring(0, 8),
   ],
-  gitlabUrls: [
+  gitlabUrls: process.env.TEST_GITLAB_URL ? [
+    process.env.TEST_GITLAB_URL,
+    process.env.TEST_GITLAB_URL,
+    process.env.TEST_GITLAB_URL,
+  ] : [
     'https://gitlab.example.com/api/v4',
-    'https://gitlab.test.com/api/v4',
+    'https://gitlab.test.com/api/v4', 
     'https://gitlab.demo.com/api/v4',
   ],
 };

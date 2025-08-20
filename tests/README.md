@@ -29,6 +29,20 @@ MCP Protocol specification compliance:
 - 🤝 Capabilities negotiation
 - 🔒 Security requirements (Origin header, auth)
 
+### `session-recovery.test.js`
+Session recovery and selective management tests:
+- 🔄 Graceful reinitialization handling (no server restarts needed)
+- 🎯 Selective session cleanup (clean one client, preserve others)
+- 🔧 Session reset functionality
+- 🚀 Concurrent operations during session management
+
+### `mock-server.test.js`
+Architecture verification without GitLab dependencies:
+- 🏗️ Server architecture validation
+- 🔗 HTTP transport layer testing
+- ⚡ Performance and resource management
+- ✅ Protocol compliance verification
+
 ### `run-all-tests.js`
 Test orchestrator and runner:
 - 🎯 Runs all test suites in sequence
@@ -62,6 +76,12 @@ npm run test:stress
 
 # Protocol compliance
 npm run test:compliance
+
+# Session recovery testing
+npm run test:recovery
+
+# Mock architecture verification
+npm run test:mock
 
 # Quick tests (reduced parameters)
 npm run test:quick
@@ -120,6 +140,62 @@ These tests verify the key architectural decisions that enable multi-client supp
 - JSON-RPC 2.0 message format enforcement  
 - Cryptographically secure session IDs using `randomUUID()`
 - Session header requirements (`Mcp-Session-Id`)
+
+## Session Management Solution
+
+The implementation provides a **complete solution to the initialization problem** without requiring server restarts:
+
+### Problem Solved
+- **Root Cause**: MCP SDK's `StreamableHTTPServerTransport` maintains global initialization state, but sessions are per-client
+- **Previous Issue**: "Server already initialized" errors required full server restart, disrupting all clients
+- **Solution**: Per-session initialization tracking with selective recovery
+
+### Implementation Details
+
+#### Per-Session State Tracking (`src/server/streamable-http-server.ts:31-40`)
+```typescript
+interface SessionData {
+  gitlabApiToken: string;
+  gitlabApiUrl: string;
+  handlerContext: HandlerContext;
+  lastUsed: Date;
+  sessionId?: string;
+  initialized: boolean;           // Track per-session init state
+  initializationCount: number;    // Count reinitialization attempts
+  clientInfo?: any;              // Store client information
+}
+```
+
+#### Graceful Reinitialization (`src/server/streamable-http-server.ts:659-707`)
+- Detects reinitialization attempts automatically
+- Resets **only the problematic session** state, not global state
+- Generates new session ID for fresh start
+- Preserves other active sessions completely
+
+#### Session Management Endpoints
+- **`GET /sessions`** - View all active sessions and their states
+- **`POST /sessions/cleanup`** - Remove a specific problematic session
+- **`POST /sessions/reset`** - Reset initialization state for a session
+
+#### Benefits
+✅ **No server restarts needed** - problematic clients don't affect others  
+✅ **Selective recovery** - fix one client while others keep working  
+✅ **Automatic detection** - server handles reinitialization gracefully  
+✅ **Concurrent safety** - all operations are thread-safe  
+✅ **Production ready** - handles real-world edge cases
+
+### Usage Example
+```bash
+# If a client gets stuck initializing, reset just that session:
+curl -X POST http://localhost:3000/sessions/reset \
+  -H "Content-Type: application/json" \
+  -d '{"sessionKey": "glpat-abc123...:https://gitlab.com/api/v4"}'
+
+# Or cleanup the entire session:
+curl -X POST http://localhost:3000/sessions/cleanup \
+  -H "Content-Type: application/json" \
+  -d '{"sessionKey": "glpat-abc123...:https://gitlab.com/api/v4"}'
+```
 
 ## Configuration
 
