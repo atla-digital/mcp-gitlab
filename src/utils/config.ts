@@ -67,6 +67,18 @@ export const configSchema = z.object({
     .optional()
     .default('false')
     .transform(val => val.toLowerCase() === 'true'),
+
+  // Testing configuration (optional)
+  testGitlabToken: z
+    .string()
+    .optional()
+    .describe('GitLab token for testing (optional)'),
+
+  testGitlabUrl: z
+    .string()
+    .optional()
+    .default('https://gitlab.com/api/v4')
+    .describe('GitLab API URL for testing'),
 });
 
 // Infer the TypeScript type from the schema
@@ -85,6 +97,8 @@ export function loadConfig(): Config {
     axiosTimeout: process.env.AXIOS_TIMEOUT,
     enableRequestLogging: process.env.ENABLE_REQUEST_LOGGING,
     enableDetailedErrors: process.env.ENABLE_DETAILED_ERRORS,
+    testGitlabToken: process.env.TEST_GITLAB_TOKEN,
+    testGitlabUrl: process.env.TEST_GITLAB_URL,
   };
 
   try {
