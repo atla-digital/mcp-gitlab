@@ -30,6 +30,67 @@ This MCP server provides comprehensive tools for interacting with GitLab reposit
 - Working with groups and group memberships
 - Managing project members and access levels
 
+## 🚀 Perfect Match: MCP-Workflow Integration
+
+**MCP-GitLab + MCP-Workflow = GitLab Development Superpowers!**
+
+This MCP server works seamlessly with [MCP-Workflow](https://github.com/atla-digital/mcp-workflow) to provide structured, workflow-driven GitLab development. Together, they deliver:
+
+### 🔄 **Structured GitLab Operations**
+- **Guided Development**: Follow proven workflows for every GitLab operation
+- **Code Review Excellence**: Systematic merge request reviews with comprehensive feedback
+- **Issue Management**: Step-by-step issue analysis and resolution workflows
+
+### 🎯 **Workflow-Driven GitLab**
+- **Consistent Process**: Every GitLab action follows established, repeatable workflows
+- **Never Get Lost**: Complex operations broken down into clear, sequential steps
+- **Quality Assurance**: Built-in validation and quality gates throughout
+
+### 💡 **Real-World Example**
+```bash
+# 1. Agent uses MCP-Workflow to start "GitLab Merge Request Review"
+workflow_get_step("gitlab-mr-review")
+
+# 2. Workflow guides systematic MR analysis using this MCP server
+gitlab_get_merge_request(project_id="web/runner", merge_request_iid=45)
+gitlab_get_merge_request_changes(project_id="web/runner", merge_request_iid=45)
+
+# 3. Agent follows workflow to provide line-specific code feedback
+gitlab_create_merge_request_discussion(
+  project_id="web/runner",
+  merge_request_iid=45,
+  body="Consider using a constant for this magic number",
+  position={
+    base_sha: "abc123...",
+    head_sha: "def456...",
+    old_path: "src/utils.js",
+    new_path: "src/utils.js",
+    new_line: 42
+  }
+)
+
+# 4. Workflow ensures comprehensive review completion
+workflow_get_step("review-completion-checklist")
+```
+
+### 🏆 **Why This Combination Works**
+- **🧭 Guided Navigation**: MCP-Workflow provides the roadmap, this server provides the GitLab tools
+- **🔒 Consistency**: Same high-quality process every time, regardless of project complexity
+- **⚡ Efficiency**: No more wondering "what's next?" - structured workflows guide every step
+- **🎨 Flexibility**: 29+ interconnected workflows covering every GitLab development scenario
+- **🔄 Context Preservation**: Workflow state maintained across long development sessions
+- **🎯 Precision**: Line-specific code comments with full GitLab discussion threading
+- **🛡️ Quality**: Built-in review gates, security analysis, and best practice enforcement
+
+**Get Started**: Install both MCP servers and experience structured GitLab development!
+
+### 🔧 **This MCP Server Provides**
+- **70+ GitLab Tools**: Complete API coverage for repositories, merge requests, issues, CI/CD, webhooks
+- **Line-Level Code Comments**: Precise feedback with `gitlab_create_merge_request_discussion`
+- **Multi-Client Support**: Concurrent access for team collaboration
+- **Session Management**: Robust session handling with automatic recovery
+- **Production Ready**: Comprehensive logging, monitoring, and error handling
+
 ## Installation
 
 ### Option 1: Using Pre-built Docker Image (Recommended)
