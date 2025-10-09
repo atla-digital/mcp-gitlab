@@ -4,3 +4,4 @@
 
 export * from './crud.js';
 export * from './links.js';
+export * from './notes.js';

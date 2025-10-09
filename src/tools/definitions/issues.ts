@@ -290,5 +290,240 @@ export const issueToolDefinitions = [
       destructiveHint: true,
       idempotentHint: false
     }
+  },
+  {
+    name: 'gitlab_list_issue_notes',
+    description: 'List all notes/comments on an issue',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project_id: {
+          type: 'string',
+          description: 'The ID or URL-encoded path of the project'
+        },
+        issue_iid: {
+          type: 'number',
+          description: 'The internal ID of the issue'
+        },
+        sort: {
+          type: 'string',
+          description: 'Sort order (asc or desc)',
+          enum: ['asc', 'desc']
+        },
+        order_by: {
+          type: 'string',
+          description: 'Order by created_at or updated_at',
+          enum: ['created_at', 'updated_at']
+        }
+      },
+      required: ['project_id', 'issue_iid']
+    },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        notes: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'number' },
+              body: { type: 'string' },
+              author: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  username: { type: 'string' }
+                }
+              },
+              created_at: { type: 'string' },
+              updated_at: { type: 'string' },
+              system: { type: 'boolean' },
+              noteable_type: { type: 'string' }
+            }
+          }
+        }
+      }
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
+    }
+  },
+  {
+    name: 'gitlab_create_issue_note',
+    description: 'Create a new note/comment on an issue',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project_id: {
+          type: 'string',
+          description: 'The ID or URL-encoded path of the project'
+        },
+        issue_iid: {
+          type: 'number',
+          description: 'The internal ID of the issue'
+        },
+        body: {
+          type: 'string',
+          description: 'The content of the note/comment (max 1,000,000 characters)'
+        }
+      },
+      required: ['project_id', 'issue_iid', 'body']
+    },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        note: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            body: { type: 'string' },
+            author: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                username: { type: 'string' }
+              }
+            },
+            created_at: { type: 'string' },
+            updated_at: { type: 'string' }
+          }
+        }
+      }
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false
+    }
+  },
+  {
+    name: 'gitlab_get_issue_note',
+    description: 'Get a specific note/comment from an issue',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project_id: {
+          type: 'string',
+          description: 'The ID or URL-encoded path of the project'
+        },
+        issue_iid: {
+          type: 'number',
+          description: 'The internal ID of the issue'
+        },
+        note_id: {
+          type: 'number',
+          description: 'The ID of the note'
+        }
+      },
+      required: ['project_id', 'issue_iid', 'note_id']
+    },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        note: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            body: { type: 'string' },
+            author: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                username: { type: 'string' }
+              }
+            },
+            created_at: { type: 'string' },
+            updated_at: { type: 'string' },
+            system: { type: 'boolean' }
+          }
+        }
+      }
+    },
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true
+    }
+  },
+  {
+    name: 'gitlab_update_issue_note',
+    description: 'Update an existing note/comment on an issue',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project_id: {
+          type: 'string',
+          description: 'The ID or URL-encoded path of the project'
+        },
+        issue_iid: {
+          type: 'number',
+          description: 'The internal ID of the issue'
+        },
+        note_id: {
+          type: 'number',
+          description: 'The ID of the note to update'
+        },
+        body: {
+          type: 'string',
+          description: 'The updated content of the note/comment'
+        }
+      },
+      required: ['project_id', 'issue_iid', 'note_id', 'body']
+    },
+    outputSchema: {
+      type: 'object',
+      properties: {
+        note: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            body: { type: 'string' },
+            author: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                username: { type: 'string' }
+              }
+            },
+            created_at: { type: 'string' },
+            updated_at: { type: 'string' }
+          }
+        }
+      }
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true
+    }
+  },
+  {
+    name: 'gitlab_delete_issue_note',
+    description: 'Delete a note/comment from an issue',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        project_id: {
+          type: 'string',
+          description: 'The ID or URL-encoded path of the project'
+        },
+        issue_iid: {
+          type: 'number',
+          description: 'The internal ID of the issue'
+        },
+        note_id: {
+          type: 'number',
+          description: 'The ID of the note to delete'
+        }
+      },
+      required: ['project_id', 'issue_iid', 'note_id']
+    },
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false
+    }
   }
 ];

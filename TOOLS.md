@@ -351,6 +351,68 @@ Remove a link between two issues
 | `issue_iid` | `number` | Yes | The internal ID of the source issue | - |
 | `issue_link_id` | `number` | Yes | The ID of the issue link to delete | - |
 
+### gitlab_list_issue_notes
+
+List all notes/comments on an issue
+
+**Parameters:**
+
+| Name | Type | Required | Description | Default |
+| ---- | ---- | -------- | ----------- | ------- |
+| `project_id` | `string` | Yes | The ID or URL-encoded path of the project | - |
+| `issue_iid` | `number` | Yes | The internal ID of the issue | - |
+| `sort` | `string` | No | Sort order (asc or desc) | - |
+| `order_by` | `string` | No | Order by created_at or updated_at | - |
+
+### gitlab_create_issue_note
+
+Create a new note/comment on an issue
+
+**Parameters:**
+
+| Name | Type | Required | Description | Default |
+| ---- | ---- | -------- | ----------- | ------- |
+| `project_id` | `string` | Yes | The ID or URL-encoded path of the project | - |
+| `issue_iid` | `number` | Yes | The internal ID of the issue | - |
+| `body` | `string` | Yes | The content of the note/comment (max 1,000,000 characters) | - |
+
+### gitlab_get_issue_note
+
+Get a specific note/comment from an issue
+
+**Parameters:**
+
+| Name | Type | Required | Description | Default |
+| ---- | ---- | -------- | ----------- | ------- |
+| `project_id` | `string` | Yes | The ID or URL-encoded path of the project | - |
+| `issue_iid` | `number` | Yes | The internal ID of the issue | - |
+| `note_id` | `number` | Yes | The ID of the note | - |
+
+### gitlab_update_issue_note
+
+Update an existing note/comment on an issue
+
+**Parameters:**
+
+| Name | Type | Required | Description | Default |
+| ---- | ---- | -------- | ----------- | ------- |
+| `project_id` | `string` | Yes | The ID or URL-encoded path of the project | - |
+| `issue_iid` | `number` | Yes | The internal ID of the issue | - |
+| `note_id` | `number` | Yes | The ID of the note to update | - |
+| `body` | `string` | Yes | The updated content of the note/comment | - |
+
+### gitlab_delete_issue_note
+
+Delete a note/comment from an issue
+
+**Parameters:**
+
+| Name | Type | Required | Description | Default |
+| ---- | ---- | -------- | ----------- | ------- |
+| `project_id` | `string` | Yes | The ID or URL-encoded path of the project | - |
+| `issue_iid` | `number` | Yes | The internal ID of the issue | - |
+| `note_id` | `number` | Yes | The ID of the note to delete | - |
+
 ### gitlab_list_project_members
 
 List members of a project

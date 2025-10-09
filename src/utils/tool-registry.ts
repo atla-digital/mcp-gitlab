@@ -56,6 +56,13 @@ export const toolRegistry: ToolRegistry = {
   gitlab_create_issue_link: issueHandlers.createIssueLink,
   gitlab_delete_issue_link: issueHandlers.deleteIssueLink,
 
+  // Issue notes tools
+  gitlab_list_issue_notes: issueHandlers.listIssueNotes,
+  gitlab_create_issue_note: issueHandlers.createIssueNote,
+  gitlab_get_issue_note: issueHandlers.getIssueNote,
+  gitlab_update_issue_note: issueHandlers.updateIssueNote,
+  gitlab_delete_issue_note: issueHandlers.deleteIssueNote,
+
   // Integration tools
   gitlab_list_integrations: integrationHandlers.listIntegrations,
   gitlab_get_integration: integrationHandlers.getIntegration,
